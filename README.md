@@ -107,6 +107,46 @@ docker run -i --rm -p 8080:8080 quarkus/quarkus-petclinic-rest-native
 
 You can then access petclinic here: http://localhost:9966/petclinic/
 
+## OpenAPI REST Documentation
+
+The following URLs can be used to access a documentation about the [quarkus-petclinic-rest](https://github.com/mpbauer/quarkus-petclinic-rest) application:
+
+**OpenAPI UI**
+
+Provides a graphical user interface with all existing REST endpoints:
+```
+http://localhost:9966/petclinic/q/swagger-ui/
+```
+
+**Open API  Schema Document**
+
+Provides an endpoint to download the Open API REST documentation:
+```
+http://localhost:9966/petclinic/q/openapi
+```
+
+## Health Checks
+
+The `smallrye-health` dependency provides health checks out of the box. The following endpoints are provided:
+
+ - `/q/health/live` - The application is up and running (liveness probe)
+ - `/q/health/ready` - The application is ready to serve requests (readiness probe)
+ - `/q/health` - Accumulating all health check procedures in the application
+ - `q/health-ui` - Provides a graphical user interface for health information
+
+Example:
+```
+http://localhost:9966/petclinic/q/health
+```
+
+## Metrics
+
+The `smallrye-metrics` dependency provides metrics which can be accessed through the `/q/metrics` endpoint.
+
+Example:
+```
+http://localhost:9966/petclinic/q/metrics
+```
 
 ## Database configuration
 
