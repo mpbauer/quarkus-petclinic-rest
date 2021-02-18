@@ -55,3 +55,10 @@ Guide: https://quarkus.io/guides/rest-json
 <p><b>Quarked!</b></p>
 
 Guide: https://quarkus.io/guides/rest-json
+
+
+# Run database via Docker
+
+````
+docker run --name petclinic -p 5432:5432 -e POSTGRES_PASSWORD=pass -d postgres
+````

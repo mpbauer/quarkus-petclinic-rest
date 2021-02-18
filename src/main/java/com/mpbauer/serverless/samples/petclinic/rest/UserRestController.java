@@ -1,0 +1,51 @@
+/*
+ * Copyright 2016-2017 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.mpbauer.serverless.samples.petclinic.rest;
+
+import com.mpbauer.serverless.samples.petclinic.model.User;
+import com.mpbauer.serverless.samples.petclinic.security.Roles;
+import com.mpbauer.serverless.samples.petclinic.service.UserService;
+
+import javax.annotation.security.RolesAllowed;
+import javax.inject.Inject;
+import javax.validation.ConstraintViolation;
+import javax.validation.Valid;
+import javax.validation.Validator;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Path("api/users")
+public class UserRestController {
+
+    @Inject
+    UserService userService;
+
+    @RolesAllowed(Roles.ADMIN)
+    @POST
+    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addOwner(@Valid User user) throws Exception {
+        this.userService.saveUser(user);
+        // TODO return Response.created(<<TODO>>).build();
+        return Response.status(Response.Status.CREATED).entity(user).build();
+    }
+}
