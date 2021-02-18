@@ -43,7 +43,6 @@ public class VetRestController {
     @RolesAllowed(Roles.VET_ADMIN)
     @GET
     @Path("/")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getAllVets() {
         Collection<Vet> vets = new ArrayList<>(this.clinicService.findAllVets());
         if (vets.isEmpty()) {
@@ -55,7 +54,6 @@ public class VetRestController {
     @RolesAllowed(Roles.VET_ADMIN)
     @GET
     @Path(value = "/{vetId}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getVet(@PathParam("vetId") int vetId) {
         Vet vet = this.clinicService.findVetById(vetId);
         if (vet == null) {
@@ -67,7 +65,6 @@ public class VetRestController {
     @RolesAllowed(Roles.VET_ADMIN)
     @POST
     @Path("/")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response addVet(@Valid @NotNull Vet vet,  @Context UriInfo uriInfo) {
         this.clinicService.saveVet(vet);
         UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
@@ -78,7 +75,6 @@ public class VetRestController {
     @RolesAllowed(Roles.VET_ADMIN)
     @PUT
     @Path("/{vetId}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response updateVet(@PathParam("vetId") int vetId, @Valid Vet vet) {
         Vet currentVet = this.clinicService.findVetById(vetId);
         if (currentVet == null) {
@@ -97,7 +93,6 @@ public class VetRestController {
     @RolesAllowed(Roles.VET_ADMIN)
     @DELETE
     @Path("/{vetId}")
-    @Produces(MediaType.APPLICATION_JSON)
     @Transactional
     public Response deleteVet(@PathParam("vetId") int vetId) {
         Vet vet = this.clinicService.findVetById(vetId);

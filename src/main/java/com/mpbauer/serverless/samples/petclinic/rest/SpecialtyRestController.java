@@ -43,7 +43,6 @@ public class SpecialtyRestController {
     @RolesAllowed(Roles.VET_ADMIN)
     @GET
     @Path("/")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getAllSpecialtys() {
         Collection<Specialty> specialties = new ArrayList<>(this.clinicService.findAllSpecialties());
         if (specialties.isEmpty()) {
@@ -55,7 +54,6 @@ public class SpecialtyRestController {
     @RolesAllowed(Roles.VET_ADMIN)
     @GET
     @Path("/{specialtyId}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getSpecialty(@PathParam("specialtyId") int specialtyId) {
         Specialty specialty = this.clinicService.findSpecialtyById(specialtyId);
         if (specialty == null) {
@@ -67,7 +65,6 @@ public class SpecialtyRestController {
     @RolesAllowed(Roles.VET_ADMIN)
     @POST
     @Path("/")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response addSpecialty(@Valid @NotNull Specialty specialty, @Context UriInfo uriInfo) {
         this.clinicService.saveSpecialty(specialty);
         UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
@@ -78,7 +75,6 @@ public class SpecialtyRestController {
     @RolesAllowed(Roles.VET_ADMIN)
     @PUT
     @Path("/{specialtyId}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response updateSpecialty(@PathParam("specialtyId") int specialtyId, @Valid @NotNull Specialty specialty) {
         Specialty currentSpecialty = this.clinicService.findSpecialtyById(specialtyId);
         if (currentSpecialty == null) {
@@ -92,7 +88,6 @@ public class SpecialtyRestController {
     @RolesAllowed(Roles.VET_ADMIN)
     @DELETE
     @Path("/{specialtyId}")
-    @Produces(MediaType.APPLICATION_JSON)
     @Transactional
     public Response deleteSpecialty(@PathParam("specialtyId") int specialtyId) {
         Specialty specialty = this.clinicService.findSpecialtyById(specialtyId);

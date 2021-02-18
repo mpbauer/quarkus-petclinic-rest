@@ -42,7 +42,6 @@ public class OwnerRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @GET
     @Path("/*/lastname/{lastName}")
-    @Produces(MediaType.APPLICATION_JSON) // can be omitted with Quarkus >= 1.10.0
     public Response getOwnersList(@PathParam("lastName") String ownerLastName) {
         if (ownerLastName == null) {
             ownerLastName = "";
@@ -57,7 +56,6 @@ public class OwnerRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @GET
     @Path("/")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getOwners() {
         Collection<Owner> owners = this.clinicService.findAllOwners();
         if (owners.isEmpty()) {
@@ -69,7 +67,6 @@ public class OwnerRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @GET
     @Path("/{ownerId}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getOwner(@PathParam("ownerId") int ownerId) {
         Owner owner = this.clinicService.findOwnerById(ownerId);
         if (owner == null) {
@@ -81,7 +78,6 @@ public class OwnerRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @POST
     @Path("/")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response addOwner(@Valid @NotNull Owner owner, @Context UriInfo uriInfo) {
         if (owner.getId() != null) {
             BindingErrorsResponse bindingErrorsResponse = new BindingErrorsResponse(owner.getId());

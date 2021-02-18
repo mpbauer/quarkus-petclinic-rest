@@ -43,7 +43,6 @@ public class VisitRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @GET
     @Path("/")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getAllVisits() {
         Collection<Visit> visits = new ArrayList<>(this.clinicService.findAllVisits());
         if (visits.isEmpty()) {
@@ -55,7 +54,6 @@ public class VisitRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @GET
     @Path("/{visitId}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getVisit(@PathParam("visitId") int visitId) {
         Visit visit = this.clinicService.findVisitById(visitId);
         if (visit == null) {
@@ -67,7 +65,6 @@ public class VisitRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @POST
     @Path("/")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response addVisit(@Valid @NotNull Visit visit, @Context UriInfo uriInfo) {
         this.clinicService.saveVisit(visit);
         UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
@@ -78,7 +75,6 @@ public class VisitRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @PUT
     @Path("/{visitId}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response updateVisit(@PathParam("visitId") int visitId, @Valid @NotNull Visit visit) {
         Visit currentVisit = this.clinicService.findVisitById(visitId);
         if (currentVisit == null) {
@@ -95,7 +91,6 @@ public class VisitRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @DELETE
     @Path("/{visitId}")
-    @Produces(MediaType.APPLICATION_JSON)
     @Transactional
     public Response deleteVisit(@PathParam("visitId") int visitId) {
         Visit visit = this.clinicService.findVisitById(visitId);

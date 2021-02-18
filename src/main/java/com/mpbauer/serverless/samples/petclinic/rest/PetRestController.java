@@ -42,7 +42,6 @@ public class PetRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @GET
     @Path("/{petId}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getPet(@PathParam("petId") int petId) {
         Pet pet = this.clinicService.findPetById(petId);
         if (pet == null) {
@@ -54,7 +53,6 @@ public class PetRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @GET
     @Path("/")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getPets() {
         Collection<Pet> pets = this.clinicService.findAllPets();
         if (pets.isEmpty()) {
@@ -66,7 +64,6 @@ public class PetRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @GET
     @Path("/pettypes")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getPetTypes() {
         return Response.ok(this.clinicService.findPetTypes()).build();
     }
@@ -74,7 +71,6 @@ public class PetRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @POST
     @Path("/")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response addPet(@Valid @NotNull Pet pet, @Context UriInfo uriInfo) {
         this.clinicService.savePet(pet);
         UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
@@ -85,7 +81,6 @@ public class PetRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @PUT
     @Path(value = "/{petId}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response updatePet(@PathParam("petId") int petId, @Valid @NotNull Pet pet) {
         Pet currentPet = this.clinicService.findPetById(petId);
         if (currentPet == null) {
@@ -102,7 +97,6 @@ public class PetRestController {
     @RolesAllowed(Roles.OWNER_ADMIN)
     @DELETE
     @Path("/{petId}")
-    @Produces(MediaType.APPLICATION_JSON)
     @Transactional
     public Response deletePet(@PathParam("petId") int petId) {
         Pet pet = this.clinicService.findPetById(petId);
