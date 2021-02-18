@@ -17,10 +17,9 @@
 package com.mpbauer.serverless.samples.petclinic.rest;
 
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -47,13 +46,22 @@ public class ExceptionControllerAdvice implements ExceptionMapper<Exception> {
         return status(Response.Status.BAD_REQUEST).entity(respJSONstring).build();
     }
 
-    private class ErrorInfo {
-        public final String className;
-        public final String exMessage;
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+    private static class ErrorInfo {
+        private String className;
+        private String exMessage;
 
         public ErrorInfo(Exception ex) {
             this.className = ex.getClass().getName();
             this.exMessage = ex.getLocalizedMessage();
+        }
+
+        public String getClassName() {
+            return className;
+        }
+
+        public String getExMessage() {
+            return exMessage;
         }
     }
 }

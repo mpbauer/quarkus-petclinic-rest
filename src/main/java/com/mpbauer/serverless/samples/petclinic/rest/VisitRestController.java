@@ -23,16 +23,12 @@ import com.mpbauer.serverless.samples.petclinic.service.ClinicService;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
-import javax.validation.Validator;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author Vitaliy Fedoriv
@@ -44,16 +40,12 @@ public class VisitRestController {
     @Inject
     ClinicService clinicService;
 
-    @Inject
-    Validator validator; // TODO try to get rid of programmatic validations and replace it with AOP
-
     @RolesAllowed(Roles.OWNER_ADMIN)
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllVisits() {
-        Collection<Visit> visits = new ArrayList<>();
-        visits.addAll(this.clinicService.findAllVisits());
+        Collection<Visit> visits = new ArrayList<>(this.clinicService.findAllVisits());
         if (visits.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
@@ -76,28 +68,18 @@ public class VisitRestController {
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addVisit(@Valid Visit visit) {
-        Set<ConstraintViolation<Visit>> errors = validator.validate(visit); // TODO
-        if (!errors.isEmpty() || (visit == null)) {
-            return Response.status(Response.Status.BAD_REQUEST).header("errors", errors.stream().collect(Collectors.toMap(ConstraintViolation::getPropertyPath, ConstraintViolation::getMessage))).entity(visit).build();
-        }
-
-        //URI location = ucBuilder.path("/api/visits/{id}").buildAndExpand(visit.getId()).toUri(); // TODO
-        //return Response.created(location).build();
+    public Response addVisit(@Valid @NotNull Visit visit, @Context UriInfo uriInfo) {
         this.clinicService.saveVisit(visit);
-        return Response.status(Response.Status.CREATED).entity(visit).build();
+        UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
+        uriBuilder.path(Integer.toString(visit.getId()));
+        return Response.created(uriBuilder.build()).entity(visit).build();
     }
 
     @RolesAllowed(Roles.OWNER_ADMIN)
     @PUT
     @Path("/{visitId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateVisit(@PathParam("visitId") int visitId, @Valid Visit visit) {
-        Set<ConstraintViolation<Visit>> errors = validator.validate(visit); // TODO
-        if (!errors.isEmpty() || (visit == null)) {
-            return Response.status(Response.Status.BAD_REQUEST).header("errors", errors.stream().collect(Collectors.toMap(ConstraintViolation::getPropertyPath, ConstraintViolation::getMessage))).entity(visit).build();
-        }
-
+    public Response updateVisit(@PathParam("visitId") int visitId, @Valid @NotNull Visit visit) {
         Visit currentVisit = this.clinicService.findVisitById(visitId);
         if (currentVisit == null) {
             return Response.status(Response.Status.NOT_FOUND).build();

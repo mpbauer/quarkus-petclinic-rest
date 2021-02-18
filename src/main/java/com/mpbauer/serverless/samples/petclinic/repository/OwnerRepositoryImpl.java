@@ -20,6 +20,7 @@ import com.mpbauer.serverless.samples.petclinic.model.Owner;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.Collection;
 
@@ -36,8 +37,8 @@ import java.util.Collection;
 public class OwnerRepositoryImpl implements OwnerRepository {
 
     @Inject
+    @PersistenceContext
     EntityManager em;
-
 
     /**
      * Important: in the current version of this method, we load Owners with all their Pets and Visits while

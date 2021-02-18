@@ -23,15 +23,11 @@ import com.mpbauer.serverless.samples.petclinic.service.ClinicService;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
-import javax.validation.Validator;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author Vitaliy Fedoriv
@@ -43,10 +39,7 @@ public class PetRestController {
     @Inject
     ClinicService clinicService;
 
-    @Inject
-    Validator validator; // TODO try to get rid of programmatic validations and replace it with AOP
-
-    @RolesAllowed( Roles.OWNER_ADMIN )
+    @RolesAllowed(Roles.OWNER_ADMIN)
     @GET
     @Path("/{petId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -58,7 +51,7 @@ public class PetRestController {
         return Response.ok(pet).build();
     }
 
-    @RolesAllowed( Roles.OWNER_ADMIN )
+    @RolesAllowed(Roles.OWNER_ADMIN)
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
@@ -70,7 +63,7 @@ public class PetRestController {
         return Response.ok(pets).build();
     }
 
-    @RolesAllowed( Roles.OWNER_ADMIN )
+    @RolesAllowed(Roles.OWNER_ADMIN)
     @GET
     @Path("/pettypes")
     @Produces(MediaType.APPLICATION_JSON)
@@ -78,34 +71,24 @@ public class PetRestController {
         return Response.ok(this.clinicService.findPetTypes()).build();
     }
 
-    @RolesAllowed( Roles.OWNER_ADMIN )
+    @RolesAllowed(Roles.OWNER_ADMIN)
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addPet(@Valid Pet pet) {
-        Set<ConstraintViolation<Pet>> errors = validator.validate(pet); // TODO
-        if (!errors.isEmpty() || (pet == null)) {
-            return Response.status(Response.Status.BAD_REQUEST).header("errors", errors.stream().collect(Collectors.toMap(ConstraintViolation::getPropertyPath, ConstraintViolation::getMessage))).entity(pet).build();
-        }
+    public Response addPet(@Valid @NotNull Pet pet, @Context UriInfo uriInfo) {
         this.clinicService.savePet(pet);
-
-        // URI location = ucBuilder.path("/api/pets/{id}").buildAndExpand(pet.getId()).toUri(); // TODO
-        //return Response.created(location).entity(pet).build(); // TODO
-
+        UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
+        uriBuilder.path(Integer.toString(pet.getId()));
         return Response.status(Response.Status.CREATED).entity(pet).build();
     }
 
-    @RolesAllowed( Roles.OWNER_ADMIN )
+    @RolesAllowed(Roles.OWNER_ADMIN)
     @PUT
     @Path(value = "/{petId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updatePet(@PathParam("petId") int petId, @Valid Pet pet) {
-        Set<ConstraintViolation<Pet>> errors = validator.validate(pet); // TODO
-        if (!errors.isEmpty() || (pet == null)) {
-            return Response.status(Response.Status.BAD_REQUEST).header("errors", errors.stream().collect(Collectors.toMap(ConstraintViolation::getPropertyPath, ConstraintViolation::getMessage))).entity(pet).build();
-        }
+    public Response updatePet(@PathParam("petId") int petId, @Valid @NotNull Pet pet) {
         Pet currentPet = this.clinicService.findPetById(petId);
-        if(currentPet == null){
+        if (currentPet == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         currentPet.setBirthDate(pet.getBirthDate());
@@ -116,7 +99,7 @@ public class PetRestController {
         return Response.noContent().entity(currentPet).build();
     }
 
-    @RolesAllowed( Roles.OWNER_ADMIN )
+    @RolesAllowed(Roles.OWNER_ADMIN)
     @DELETE
     @Path("/{petId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -129,6 +112,4 @@ public class PetRestController {
         this.clinicService.deletePet(pet);
         return Response.noContent().build();
     }
-
-
 }

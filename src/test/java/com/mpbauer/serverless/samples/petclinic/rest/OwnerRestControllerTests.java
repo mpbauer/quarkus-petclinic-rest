@@ -121,7 +121,7 @@ class OwnerRestControllerTests {
 
     @Test
         //@WithMockUser(roles="OWNER_ADMIN") // TODO
-    void testGetOwnerSuccess() throws Exception {
+    void testGetOwnerSuccess() {
         given(this.clinicService.findOwnerById(1)).willReturn(owners.get(0));
 
         given()
@@ -137,7 +137,7 @@ class OwnerRestControllerTests {
 
     //@WithMockUser(roles = "OWNER_ADMIN")
     @Test
-    void testGetOwnerNotFound() throws Exception {
+    void testGetOwnerNotFound() {
         given(this.clinicService.findOwnerById(-1)).willReturn(null);
         given()
             .auth().none() // TODO change to JWT Token Authentication
@@ -150,7 +150,7 @@ class OwnerRestControllerTests {
 
     @Test
         //@WithMockUser(roles = "OWNER_ADMIN")
-    void testGetOwnersListSuccess() throws Exception {
+    void testGetOwnersListSuccess() {
         owners.remove(0);
         owners.remove(1);
         given(this.clinicService.findOwnerByLastName("Davis")).willReturn(owners);
@@ -169,7 +169,7 @@ class OwnerRestControllerTests {
 
     @Test
         //@WithMockUser(roles = "OWNER_ADMIN")
-    void testGetOwnersListNotFound() throws Exception {
+    void testGetOwnersListNotFound() {
         owners.clear();
         given(this.clinicService.findOwnerByLastName("0")).willReturn(owners);
         given()
@@ -183,7 +183,7 @@ class OwnerRestControllerTests {
 
     @Test
         //@WithMockUser(roles = "OWNER_ADMIN")
-    void testGetAllOwnersSuccess() throws Exception {
+    void testGetAllOwnersSuccess() {
         owners.remove(0);
         owners.remove(1);
         given(this.clinicService.findAllOwners()).willReturn(owners);
@@ -202,7 +202,7 @@ class OwnerRestControllerTests {
 
     @Test
         //@WithMockUser(roles = "OWNER_ADMIN")
-    void testGetAllOwnersNotFound() throws Exception {
+    void testGetAllOwnersNotFound() {
         owners.clear();
         given(this.clinicService.findAllOwners()).willReturn(owners);
         given()
@@ -212,25 +212,6 @@ class OwnerRestControllerTests {
             .get("/api/owners/")
             .then()
             .statusCode(Response.Status.NOT_FOUND.getStatusCode());
-    }
-
-    @Test
-        //@WithMockUser(roles = "OWNER_ADMIN")
-    void testCreateOwnerSuccess() throws Exception {
-        Owner newOwner = owners.get(0);
-        newOwner.setId(null);
-        ObjectMapper mapper = new ObjectMapper();
-        String newOwnerAsJSON = mapper.writeValueAsString(newOwner);
-
-        given()
-            .auth().none()
-            .accept(ContentType.JSON)
-            .contentType(ContentType.JSON)
-            .body(newOwnerAsJSON)
-            .when()
-            .post("/api/owners/")
-            .then()
-            .statusCode(Response.Status.CREATED.getStatusCode());
     }
 
     @Test
@@ -433,5 +414,4 @@ class OwnerRestControllerTests {
             .then()
             .statusCode(Response.Status.NOT_FOUND.getStatusCode());
     }
-
 }

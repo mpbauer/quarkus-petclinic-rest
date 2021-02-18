@@ -20,6 +20,7 @@ import com.mpbauer.serverless.samples.petclinic.model.Visit;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.Collection;
 import java.util.List;
@@ -39,6 +40,7 @@ import java.util.List;
 public class VisitRepositoryImpl implements VisitRepository {
 
     @Inject
+    @PersistenceContext
     EntityManager em;
 
 

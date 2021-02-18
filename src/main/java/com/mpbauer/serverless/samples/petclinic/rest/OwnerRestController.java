@@ -24,10 +24,9 @@ import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import javax.validation.Validator;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import java.util.Collection;
 
 /**
@@ -39,9 +38,6 @@ public class OwnerRestController {
 
     @Inject
     ClinicService clinicService;
-
-    @Inject
-    Validator validator; // TODO try to get rid of programmatic validations and replace it with AOP
 
     @RolesAllowed(Roles.OWNER_ADMIN)
     @GET
@@ -75,8 +71,7 @@ public class OwnerRestController {
     @Path("/{ownerId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getOwner(@PathParam("ownerId") int ownerId) {
-        Owner owner = null;
-        owner = this.clinicService.findOwnerById(ownerId);
+        Owner owner = this.clinicService.findOwnerById(ownerId);
         if (owner == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
@@ -87,14 +82,16 @@ public class OwnerRestController {
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addOwner(@Valid Owner owner) {
+    public Response addOwner(@Valid @NotNull Owner owner, @Context UriInfo uriInfo) {
         if (owner.getId() != null) {
-            BindingErrorsResponse<Owner> bindingErrorsResponse = new BindingErrorsResponse<>(owner.getId());
+            BindingErrorsResponse bindingErrorsResponse = new BindingErrorsResponse(owner.getId());
             return Response.status(Response.Status.BAD_REQUEST).header("errors", bindingErrorsResponse.toJSON()).build();
         }
+
         this.clinicService.saveOwner(owner);
-        //headers.setLocation(ucBuilder.path("/api/owners/{id}").buildAndExpand(owner.getId()).toUri()); // TODO implement this
-        return Response.ok(owner).status(Response.Status.CREATED).build();
+        UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
+        uriBuilder.path(Integer.toString(owner.getId()));
+        return Response.created(uriBuilder.build()).entity(owner).build();
     }
 
     @RolesAllowed(Roles.OWNER_ADMIN)
@@ -103,7 +100,7 @@ public class OwnerRestController {
     public Response updateOwner(@PathParam("ownerId") int ownerId, @Valid Owner owner) {
         boolean bodyIdMatchesPathId = owner.getId() == null || ownerId == owner.getId();
         if (!bodyIdMatchesPathId) {
-            BindingErrorsResponse<Owner> bindingErrorsResponse = new BindingErrorsResponse<>(ownerId, owner.getId());
+            BindingErrorsResponse bindingErrorsResponse = new BindingErrorsResponse(ownerId, owner.getId());
             return Response.status(Response.Status.BAD_REQUEST).header("errors", bindingErrorsResponse.toJSON()).build();
         }
         Owner currentOwner = this.clinicService.findOwnerById(ownerId);
@@ -131,5 +128,4 @@ public class OwnerRestController {
         this.clinicService.deleteOwner(owner);
         return Response.noContent().build();
     }
-
 }

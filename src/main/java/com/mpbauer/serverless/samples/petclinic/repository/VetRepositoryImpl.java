@@ -20,6 +20,7 @@ import com.mpbauer.serverless.samples.petclinic.model.Vet;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Collection;
 
 /**
@@ -35,6 +36,7 @@ import java.util.Collection;
 public class VetRepositoryImpl implements VetRepository {
 
     @Inject
+    @PersistenceContext
     EntityManager em;
 
 

@@ -21,6 +21,7 @@ import com.mpbauer.serverless.samples.petclinic.model.PetType;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Collection;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import java.util.List;
 public class PetRepositoryImpl implements PetRepository {
 
     @Inject
+    @PersistenceContext
     EntityManager em;
 
     @Override
@@ -67,7 +69,6 @@ public class PetRepositoryImpl implements PetRepository {
 
     @Override
     public void delete(Pet pet) {
-        //this.em.remove(this.em.contains(pet) ? pet : this.em.merge(pet));
         String petId = pet.getId().toString();
         this.em.createQuery("DELETE FROM Visit visit WHERE pet_id=" + petId).executeUpdate();
         this.em.createQuery("DELETE FROM Pet pet WHERE id=" + petId).executeUpdate();

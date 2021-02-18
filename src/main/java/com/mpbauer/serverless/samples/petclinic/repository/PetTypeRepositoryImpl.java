@@ -23,6 +23,7 @@ import com.mpbauer.serverless.samples.petclinic.model.Visit;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Collection;
 import java.util.List;
 
@@ -34,6 +35,7 @@ import java.util.List;
 public class PetTypeRepositoryImpl implements PetTypeRepository {
 
     @Inject
+    @PersistenceContext
     EntityManager em;
 
     @Override

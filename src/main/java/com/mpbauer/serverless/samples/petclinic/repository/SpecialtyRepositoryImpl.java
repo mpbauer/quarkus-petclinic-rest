@@ -21,6 +21,7 @@ import com.mpbauer.serverless.samples.petclinic.model.Specialty;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Collection;
 
 /**
@@ -31,6 +32,7 @@ import java.util.Collection;
 public class SpecialtyRepositoryImpl implements SpecialtyRepository {
 
     @Inject
+    @PersistenceContext
     EntityManager em;
 
     @Override

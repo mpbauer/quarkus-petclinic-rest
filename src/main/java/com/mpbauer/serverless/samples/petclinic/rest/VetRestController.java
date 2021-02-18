@@ -23,16 +23,12 @@ import com.mpbauer.serverless.samples.petclinic.service.ClinicService;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
-import javax.validation.Validator;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author Vitaliy Fedoriv
@@ -44,16 +40,12 @@ public class VetRestController {
     @Inject
     ClinicService clinicService;
 
-    @Inject
-    Validator validator; // TODO try to get rid of programmatic validations and replace it with AOP
-
     @RolesAllowed(Roles.VET_ADMIN)
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllVets() {
-        Collection<Vet> vets = new ArrayList<>();
-        vets.addAll(this.clinicService.findAllVets());
+        Collection<Vet> vets = new ArrayList<>(this.clinicService.findAllVets());
         if (vets.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
@@ -76,16 +68,11 @@ public class VetRestController {
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addVet(@Valid Vet vet) {
-        Set<ConstraintViolation<Vet>> errors = validator.validate(vet); // TODO
-        if (!errors.isEmpty() || (vet == null)) {
-            return Response.status(Response.Status.BAD_REQUEST).header("errors", errors.stream().collect(Collectors.toMap(ConstraintViolation::getPropertyPath, ConstraintViolation::getMessage))).entity(vet).build();
-        }
-
-        // URI location = ucBuilder.path("/api/vets/{id}").buildAndExpand(vet.getId()).toUri(); // TODO
-        // return Response.created(location).build();
+    public Response addVet(@Valid @NotNull Vet vet,  @Context UriInfo uriInfo) {
         this.clinicService.saveVet(vet);
-        return Response.status(Response.Status.CREATED).entity(vet).build();
+        UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
+        uriBuilder.path(Integer.toString(vet.getId()));
+        return Response.created(uriBuilder.build()).entity(vet).build();
     }
 
     @RolesAllowed(Roles.VET_ADMIN)
@@ -93,11 +80,6 @@ public class VetRestController {
     @Path("/{vetId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateVet(@PathParam("vetId") int vetId, @Valid Vet vet) {
-        Set<ConstraintViolation<Vet>> errors = validator.validate(vet); // TODO
-        if (!errors.isEmpty() || (vet == null)) {
-            return Response.status(Response.Status.BAD_REQUEST).header("errors", errors.stream().collect(Collectors.toMap(ConstraintViolation::getPropertyPath, ConstraintViolation::getMessage))).entity(vet).build();
-        }
-
         Vet currentVet = this.clinicService.findVetById(vetId);
         if (currentVet == null) {
             return Response.status(Response.Status.NOT_FOUND).build();

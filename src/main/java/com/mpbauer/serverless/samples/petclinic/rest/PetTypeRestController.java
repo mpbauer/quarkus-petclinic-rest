@@ -23,16 +23,12 @@ import com.mpbauer.serverless.samples.petclinic.service.ClinicService;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
-import javax.validation.Validator;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Path("api/pettypes")
 public class PetTypeRestController {
@@ -40,16 +36,12 @@ public class PetTypeRestController {
     @Inject
     ClinicService clinicService;
 
-    @Inject
-    Validator validator; // TODO try to get rid of programmatic validations and replace it with AOP
-
     @RolesAllowed({Roles.OWNER_ADMIN, Roles.VET_ADMIN})
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllPetTypes() {
-        Collection<PetType> petTypes = new ArrayList<>();
-        petTypes.addAll(this.clinicService.findAllPetTypes());
+        Collection<PetType> petTypes = new ArrayList<>(this.clinicService.findAllPetTypes());
         if (petTypes.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
@@ -72,15 +64,10 @@ public class PetTypeRestController {
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addPetType(@Valid PetType petType) {
-        Set<ConstraintViolation<PetType>> errors = validator.validate(petType); // TODO
-        if (!errors.isEmpty() || (petType == null)) {
-            return Response.status(Response.Status.BAD_REQUEST).header("errors", errors.stream().collect(Collectors.toMap(ConstraintViolation::getPropertyPath, ConstraintViolation::getMessage))).entity(petType).build();
-        }
+    public Response addPetType(@Valid @NotNull PetType petType, @Context UriInfo uriInfo) {
         this.clinicService.savePetType(petType);
-
-        // URI location = ucBuilder.path("/api/pettypes/{id}").buildAndExpand(petType.getId()).toUri(); // TODO
-        // return Response.created(location).build();
+        UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
+        uriBuilder.path(Integer.toString(petType.getId()));
         return Response.status(Response.Status.CREATED).entity(petType).build();
     }
 
@@ -88,11 +75,7 @@ public class PetTypeRestController {
     @PUT
     @Path("/{petTypeId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updatePetType(@PathParam("petTypeId") int petTypeId, @Valid PetType petType) {
-        Set<ConstraintViolation<PetType>> errors = validator.validate(petType); // TODO
-        if (!errors.isEmpty() || (petType == null)) {
-            return Response.status(Response.Status.BAD_REQUEST).header("errors", errors.stream().collect(Collectors.toMap(ConstraintViolation::getPropertyPath, ConstraintViolation::getMessage))).entity(petType).build();
-        }
+    public Response updatePetType(@PathParam("petTypeId") int petTypeId, @Valid @NotNull PetType petType) {
         PetType currentPetType = this.clinicService.findPetTypeById(petTypeId);
         if (currentPetType == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -115,5 +98,4 @@ public class PetTypeRestController {
         this.clinicService.deletePetType(petType);
         return Response.noContent().build();
     }
-
 }

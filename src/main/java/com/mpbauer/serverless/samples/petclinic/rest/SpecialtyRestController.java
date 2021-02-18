@@ -23,16 +23,12 @@ import com.mpbauer.serverless.samples.petclinic.service.ClinicService;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
-import javax.validation.Validator;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author Vitaliy Fedoriv
@@ -44,16 +40,12 @@ public class SpecialtyRestController {
     @Inject
     ClinicService clinicService;
 
-    @Inject
-    Validator validator; // TODO try to get rid of programmatic validations and replace it with AOP
-
     @RolesAllowed(Roles.VET_ADMIN)
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllSpecialtys() {
-        Collection<Specialty> specialties = new ArrayList<>();
-        specialties.addAll(this.clinicService.findAllSpecialties());
+        Collection<Specialty> specialties = new ArrayList<>(this.clinicService.findAllSpecialties());
         if (specialties.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
@@ -76,15 +68,10 @@ public class SpecialtyRestController {
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addSpecialty(@Valid Specialty specialty) {
-        Set<ConstraintViolation<Specialty>> errors = validator.validate(specialty); // TODO
-        if (!errors.isEmpty() || (specialty == null)) {
-            return Response.status(Response.Status.BAD_REQUEST).header("errors", errors.stream().collect(Collectors.toMap(ConstraintViolation::getPropertyPath, ConstraintViolation::getMessage))).entity(specialty).build();
-        }
+    public Response addSpecialty(@Valid @NotNull Specialty specialty, @Context UriInfo uriInfo) {
         this.clinicService.saveSpecialty(specialty);
-
-        // URI location = ucBuilder.path("/api/specialtys/{id}").buildAndExpand(specialty.getId()).toUri(); // TODO
-        // return Response.created(location).build();
+        UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
+        uriBuilder.path(Integer.toString(specialty.getId()));
         return Response.status(Response.Status.CREATED).entity(specialty).build();
     }
 
@@ -92,11 +79,7 @@ public class SpecialtyRestController {
     @PUT
     @Path("/{specialtyId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateSpecialty(@PathParam("specialtyId") int specialtyId, @Valid Specialty specialty) {
-        Set<ConstraintViolation<Specialty>> errors = validator.validate(specialty); // TODO
-        if (!errors.isEmpty() || (specialty == null)) {
-            return Response.status(Response.Status.BAD_REQUEST).header("errors", errors.stream().collect(Collectors.toMap(ConstraintViolation::getPropertyPath, ConstraintViolation::getMessage))).entity(specialty).build();
-        }
+    public Response updateSpecialty(@PathParam("specialtyId") int specialtyId, @Valid @NotNull Specialty specialty) {
         Specialty currentSpecialty = this.clinicService.findSpecialtyById(specialtyId);
         if (currentSpecialty == null) {
             return Response.status(Response.Status.NOT_FOUND).build();

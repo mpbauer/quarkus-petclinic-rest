@@ -20,24 +20,16 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mpbauer.serverless.samples.petclinic.model.BaseEntity;
-import com.mpbauer.serverless.samples.petclinic.model.Owner;
 
-import javax.validation.ConstraintViolation;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Vitaliy Fedoriv
  *
  */
 
-public class BindingErrorsResponse<T> {
-
-    public BindingErrorsResponse() {
-        this(null);
-    }
+public class BindingErrorsResponse {
 
     public BindingErrorsResponse(Integer id) {
         this(null, id);
@@ -67,18 +59,6 @@ public class BindingErrorsResponse<T> {
 
 	public void addError(BindingError bindingError) {
 		this.bindingErrors.add(bindingError);
-	}
-
-	public void addAllErrors(Set<ConstraintViolation<T>> bindingResult) {
-
-	    bindingResult.forEach(constraintViolation -> {
-	        BindingError error = new BindingError();
-	        error.setObjectName(constraintViolation.getRootBean().getClass().getName());
-	        error.setFieldName(constraintViolation.getPropertyPath().toString());
-	        error.setFieldValue(constraintViolation.getInvalidValue().toString());
-	        error.setErrorMessage(constraintViolation.getMessage());
-	        addError(error);
-        });
 	}
 
 	public String toJSON() {
@@ -124,8 +104,8 @@ public class BindingErrorsResponse<T> {
 			this.fieldValue = fieldValue;
 		}
 
-		protected void setErrorMessage(String error_message) {
-			this.errorMessage = error_message;
+		protected void setErrorMessage(String errorMessage) {
+			this.errorMessage = errorMessage;
 		}
 
 		@Override
@@ -133,7 +113,5 @@ public class BindingErrorsResponse<T> {
 			return "BindingError [objectName=" + objectName + ", fieldName=" + fieldName + ", fieldValue=" + fieldValue
 					+ ", errorMessage=" + errorMessage + "]";
 		}
-
 	}
-
 }

@@ -22,16 +22,13 @@ import com.mpbauer.serverless.samples.petclinic.service.UserService;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
-import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
-import javax.validation.Validator;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Path("api/users")
 public class UserRestController {
@@ -43,9 +40,8 @@ public class UserRestController {
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addOwner(@Valid User user) throws Exception {
+    public Response addOwner(@Valid @NotNull User user) throws Exception {
         this.userService.saveUser(user);
-        // TODO return Response.created(<<TODO>>).build();
         return Response.status(Response.Status.CREATED).entity(user).build();
     }
 }
