@@ -1,4 +1,4 @@
-[![Quarkus](https://design.jboss.org/quarkus/logo/final/PNG/quarkus_logo_horizontal_rgb_1280px_default.png)](https://quarkus.io/)
+[![Quarkus](docs/images/quarkus-logo.png)](https://quarkus.io/)
 
 # Quarkus PetClinic Sample Application
 
