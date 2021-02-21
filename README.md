@@ -1,4 +1,4 @@
-[![Quarkus](https://design.jboss.org/quarkus/logo/final/PNG/quarkus_logo_horizontal_rgb_1280px_default.png)](https://quarkus.io/)
+[![Quarkus](docs/images/quarkus-logo.png)](https://quarkus.io/)
 
 # Quarkus PetClinic Sample Application
 
@@ -15,7 +15,7 @@ A local copy of the presentation can be found [here](docs/misc/springframeworkpe
 
 ### Petclinic ER Model
 
-![alt petclinic-ermodel](docs/images/petclinic-ermodel.png)
+![alt petclinic-ermodel](docs/diagrams/petclinic-ermodel.png)
 
 
 ## Running the petclinic application locally
@@ -24,7 +24,7 @@ A local copy of the presentation can be found [here](docs/misc/springframeworkpe
 
 You can run your application in dev mode that enables live coding using:
 ```shell script
-./mvnw compile quarkus:dev
+./mvnw quarkus:dev
 ```
 
 ## Packaging and running the application with JVM
@@ -58,7 +58,7 @@ Then run the container using:
 docker run -i --rm -p 8080:8080 quarkus/quarkus-petclinic-rest-jvm
 ```
 
-You can then access petclinic here: http://localhost:9966/petclinic/
+You can then access petclinic here: http://localhost:8080/petclinic/
 
 The application is now runnable using `java -jar target/quarkus-petclinic-rest-1.0.0-SNAPSHOT-runner.jar`.
 
@@ -105,7 +105,7 @@ Then run the container using:
 docker run -i --rm -p 8080:8080 quarkus/quarkus-petclinic-rest-native
 ```
 
-You can then access petclinic here: http://localhost:9966/petclinic/
+You can then access petclinic here: http://localhost:8080/petclinic/
 
 ## OpenAPI REST Documentation
 
@@ -115,14 +115,14 @@ The following URLs can be used to access a documentation about the [quarkus-petc
 
 Provides a graphical user interface with all existing REST endpoints:
 ```
-http://localhost:9966/petclinic/q/swagger-ui/
+http://localhost:8080/petclinic/q/swagger-ui/
 ```
 
 **Open API  Schema Document**
 
 Provides an endpoint to download the Open API REST documentation:
 ```
-http://localhost:9966/petclinic/q/openapi
+http://localhost:8080/petclinic/q/openapi
 ```
 
 ## Health Checks
@@ -136,7 +136,7 @@ The `smallrye-health` dependency provides health checks out of the box. The foll
 
 Example:
 ```
-http://localhost:9966/petclinic/q/health
+http://localhost:8080/petclinic/q/health
 ```
 
 ## Metrics
@@ -145,7 +145,7 @@ The `smallrye-metrics` dependency provides metrics which can be accessed through
 
 Example:
 ```
-http://localhost:9966/petclinic/q/metrics
+http://localhost:8080/petclinic/q/metrics
 ```
 
 ## Database configuration
@@ -172,7 +172,7 @@ In its default configuration, Petclinic doesn't have authentication and authoriz
 
 In order to use the JWT based authentication functionality, you can turn it on by setting the following property 
 in the `application.properties` file:
-```properties
+```
 petclinic.security.enable=false
 ```
 
@@ -188,3 +188,121 @@ OWNER_ADMIN  | OwnerController<br/>PetController<br/>PetTypeController (`getAllP
 VET_ADMIN    | PetTypeController<br/>SpecialityController</br>VetController
 ADMIN        | UserController
 
+# GitHub Actions CI/CD configuration
+
+This section explains the necessary setup details to build and deploy the `quarkus-petclinic-rest` application to [Google Cloud Platform (GCP)](https://cloud.google.com/) and [Amazon Web Services (AWS)](https://aws.amazon.com/).
+
+## Google Cloud Platform (GCP)
+
+GitHub Actions is building the container images with [Google Cloud Build](https://cloud.google.com/build) and stores the 
+resulting container image in [Google Container Registry](https://cloud.google.com/container-registry). Afterwards the image
+is going to be deployed to [Google Cloud Run](https://cloud.google.com/run)
+
+### Prerequisites
+
+Before you start you should have already set up a [GCP account](https://cloud.google.com/gcp) with a [billing account](https://cloud.google.com/billing/docs/how-to/manage-billing-account) as well as a project. 
+There are several ways to set up a service account with GCP. You can either use the Google Cloud SDK or the Management 
+Console in your browser to create and configure service accounts.
+
+### Create a Service Account with `gcloud`
+
+1) Export these environment variables so that you can copy and paste the following commands:
+```
+export PROJECT_ID=<YOUR PROJECT ID>
+export SERVICE_ACCOUNT_NAME=<ENTER A NAME FOR YOUR SERVICE ACCOUNT>
+```
+
+2) Log in with your Google account:
+```
+gcloud auth login
+```
+
+3) Select the project configured via `$PROJECT_ID`:
+```
+gcloud config set project $PROJECT_ID
+```
+
+4) Enable the necessary services:
+```
+gcloud services enable cloudbuild.googleapis.com run.googleapis.com containerregistry.googleapis.com
+```
+
+5) Create a service account:
+```
+gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
+  --description="Cloud Run deploy account" \
+  --display-name="Cloud-Run-Deploy"
+```
+
+6) Give the service account Cloud Run Admin, Storage Admin, and Service Account User roles. You can’t set all of them at once, so you have to run separate commands:
+```
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/run.admin
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/storage.admin
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/iam.serviceAccountUser
+```
+
+7) Generate a key.json file with your credentials, so your GitHub workflow can authenticate with Google Cloud. After issuing
+the following command you can find the generated key in your current folder.
+```
+gcloud iam service-accounts keys create key.json \
+    --iam-account $SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com
+```
+
+The following tutorial explains this in more detail: [link](https://cloud.google.com/community/tutorials/cicd-cloud-run-github-actions)
+
+### Create a Service Account with [GCP Management Console](https://console.cloud.google.com/)
+
+1) Open the [Google Cloud Management Console](https://console.cloud.google.com) in your browser
+
+2) Select your project with the dropdown on the top navigation bar
+   
+    [![SETUP_GCP_SERVICE_ACCOUNT_00](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_00.png)](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_00.png)
+
+3) Go to [IAM & Admin](https://console.cloud.google.com/iam-admin/) > [Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts) and click `ADD`to create a new service account
+
+4) Enter a name and a description (optional) for your new service account and click `CREATE`
+    [![SETUP_GCP_SERVICE_ACCOUNT_01](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_01.png)](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_01.png)
+
+5) Add the following roles to your service account and click `DONE`. The third step is not necessary and can be skipped.
+    - `Cloud Run Admin`
+    - `Storage Admin`
+    - `Service Account User`
+
+   [![SETUP_GCP_SERVICE_ACCOUNT_02](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_02.png)](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_02.png)
+
+6) Now click on your newly created service account and click `ADD KEY` on the service account details page. 
+   This will create new credentials which will be later used to authenticate your service account. Select `JSON`and 
+   click `CREATE` to generate and download your service account credentials.
+
+   [![SETUP_GCP_SERVICE_ACCOUNT_03](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_03.png)](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_03.png)
+
+7) Your service account credentials have been generated and downloaded on your machine. Make sure to keep them safe!
+
+   [![SETUP_GCP_SERVICE_ACCOUNT_04](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_04.png)](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_04.png)
+
+
+### GitHub configuration
+
+In GitHub, you need to set up the following secrets via your repositories settings tab:
+
+- `GCP_PROJECT_ID` - The GCP project id which was defined in `$PROJECT_ID` during the service account creation step
+- `GCP_APP_NAME` - The name of your app (used for container image tagging)
+- `GCP_SERVICE_ACCOUNT_EMAIL` - The email from the previously created service account
+- `GCP_SERVICE_ACCOUNT_CREDENTIALS` - The content from the `key.json` file that was previously created
+
+In the end your secrets should look like this:
+
+  [![SETUP_GITHUB_GCP_SECRETS_00](docs/screenshots/setup-github-secrets/setup_github_gcp_secrets_00.png)](docs/screenshots/setup-github-secrets/setup_github_gcp_secrets_00.png)
+
+
+## Amazon Web Services (AWS)
+
+> :construction: This section is currently under heavy construction. Please check again later!
