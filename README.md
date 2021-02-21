@@ -272,9 +272,18 @@ The following tutorial explains this in more detail: [link](https://cloud.google
     [![SETUP_GCP_SERVICE_ACCOUNT_01](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_01.png)](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_01.png)
 
 5) Add the following roles to your service account and click `DONE`. The third step is not necessary and can be skipped.
-    - `Cloud Run Admin`
-    - `Storage Admin`
+    - `Cloud Build Service Account`
+    - `Cloud Build Editor`
     - `Service Account User`
+    - `Cloud Run Admin`
+    - `Viewer`
+    - `Storage Admin`
+    
+    Link: https://towardsdatascience.com/deploy-to-google-cloud-run-using-github-actions-590ecf957af0
+
+    > Explanation of the Viewer Role: 
+    >
+    > Once the service account is created you will need to select the following roles. I tried a number of different ways to remove the very permissive project viewer role, but at the time of this writing this your service account will need this role or the deployment will appear to fail in Github even if it is successfully deployed to Cloud Run.
 
    [![SETUP_GCP_SERVICE_ACCOUNT_02](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_02.png)](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_02.png)
 

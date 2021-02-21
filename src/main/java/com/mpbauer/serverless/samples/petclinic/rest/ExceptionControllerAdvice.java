@@ -20,6 +20,8 @@ package com.mpbauer.serverless.samples.petclinic.rest;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -33,15 +35,18 @@ import static javax.ws.rs.core.Response.status;
 @Provider
 public class ExceptionControllerAdvice implements ExceptionMapper<Exception> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
+
     @Override
     public Response toResponse(Exception e) {
+        LOG.info("An unhandled exception occurred", e);
         ObjectMapper mapper = new ObjectMapper();
         ErrorInfo errorInfo = new ErrorInfo(e);
         String respJSONstring = "{}";
         try {
             respJSONstring = mapper.writeValueAsString(errorInfo);
         } catch (JsonProcessingException e1) {
-            e1.printStackTrace();
+            LOG.error("Could not serialize error to JSON", e1);
         }
         return status(Response.Status.BAD_REQUEST).entity(respJSONstring).build();
     }
