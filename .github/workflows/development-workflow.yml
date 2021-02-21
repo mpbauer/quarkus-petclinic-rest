@@ -1,0 +1,116 @@
+name: DevelopmentCI
+
+on:
+  push:
+    branches: [ develop ]
+  workflow_dispatch:
+
+jobs:
+  jvm-build-job:
+    runs-on: ubuntu-latest
+    steps:
+      # Clone git project
+      - uses: actions/checkout@v2
+
+      # Set up JDK 11
+      - name: 'Set up JDK 11'
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      # Build and test the application
+      - name: 'Build & Test'
+        run: mvn clean package
+
+      # Setup Google Cloud SDK
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          service_account_email: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+          service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS }}
+          export_default_credentials: true
+
+      # Configure Docker with Google Cloud Credentials
+      - name: 'Configure Docker'
+        run: |
+          gcloud auth configure-docker
+
+      # Move Dockerfile with JVM Runtime to the projects root directory
+      - name: 'Copy Dockerfile with JVM Runtime'
+        run: cp ./src/main/docker/Dockerfile.jvm ./Dockerfile
+
+      # Build & publish the container image with Google Cloud Build
+      - name: 'Build & publish Docker Image'
+        run: |
+          gcloud config set project ${{ secrets.GCP_PROJECT }}
+          gcloud builds submit --tag gcr.io/${{ secrets.GCP_PROJECT }}/quarkus-petclinic-rest-jvm:${GITHUB_SHA::12}-SNAPSHOT
+          gcloud config set run/region europe-west1
+
+      # Deploy the Docker image to Google Cloud Run
+      - name: 'Deploy to Cloud Run'
+        run: |
+          gcloud run deploy quarkus-petclinic-rest-jvm-dev --image gcr.io/${{ secrets.GCP_PROJECT }}/quarkus-petclinic-rest-jvm:${GITHUB_SHA::12}-SNAPSHOT \
+          --platform managed \
+          --allow-unauthenticated \
+          --set-env-vars "DB_USERNAME=${{ secrets.GCP_DB_USERNAME }}" \
+          --set-env-vars "DB_PASSWORD=${{ secrets.GCP_DB_PASSWORD }}" \
+          --set-env-vars "DB_HOST=${{ secrets.GCP_DB_HOST }}" \
+          --set-env-vars "DB_PORT=${{ secrets.GCP_DB_PORT }}" \
+          --set-env-vars "DB_DATABASE=${{ secrets.GCP_DB_DATABASE }}" \
+          --memory 512M
+
+  native-image-build-job:
+    runs-on: ubuntu-latest
+    steps:
+      # Clone git project
+      - uses: actions/checkout@v2
+
+      # Set up GraalVM 20.3.1 with Java 11
+      - name: 'Setup GraalVM Environment'
+        uses: DeLaGuardo/setup-graalvm@master
+        with:
+          graalvm-version: '20.3.1.java11'
+
+      # Install GraalVM native-image plugin
+      - name: 'Install GraalVM Native Image Plugin'
+        run: |
+          gu install native-image
+
+      # Build and test the application
+      - name: 'Build & Test Native Image'
+        run: mvn package -Pnative
+
+      # Set up Google Cloud SDK
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          service_account_email: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+          service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS }}
+          export_default_credentials: true
+
+      # Configure Docker with Google Cloud Credentials
+      - name: 'Configure Docker'
+        run: |
+          gcloud auth configure-docker
+
+      # Copy Dockerfile for native executables to the projects root directory
+      - name: 'Copy Dockerfile for Native Executables'
+        run: cp ./src/main/docker/Dockerfile.native ./Dockerfile
+
+      # Build the Docker image
+      - name: 'Build & publish Docker Image'
+        run: |
+          gcloud config set project ${{ secrets.GCP_PROJECT }}
+          gcloud builds submit --tag gcr.io/${{ secrets.GCP_PROJECT }}/quarkus-petclinic-rest-native:${GITHUB_SHA::12}-SNAPSHOT
+          gcloud config set run/region europe-west1
+
+      # Deploy the Docker image to Google Cloud Run
+      - name: 'Deploy to Cloud Run'
+        run: |
+          gcloud run deploy quarkus-google-cloud-run-native --image gcr.io/${{ secrets.GCP_PROJECT }}/quarkus-petclinic-rest-native:${GITHUB_SHA::12}-SNAPSHOT \
+          --platform managed \
+          --allow-unauthenticated \
+          --set-env-vars "DB_USERNAME=${{ secrets.GCP_DB_USERNAME }}" \
+          --set-env-vars "DB_PASSWORD=${{ secrets.GCP_DB_PASSWORD }}" \
+          --set-env-vars "DB_HOST=${{ secrets.GCP_DB_HOST }}" \
+          --set-env-vars "DB_PORT=${{ secrets.GCP_DB_PORT }}" \
+          --set-env-vars "DB_DATABASE=${{ secrets.GCP_DB_DATABASE }}" \
+          --memory 512M
