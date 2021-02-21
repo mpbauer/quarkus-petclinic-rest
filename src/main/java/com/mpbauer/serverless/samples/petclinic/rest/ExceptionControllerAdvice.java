@@ -39,7 +39,6 @@ public class ExceptionControllerAdvice implements ExceptionMapper<Exception> {
 
     @Override
     public Response toResponse(Exception e) {
-        LOG.info("An unhandled exception occurred", e);
         ObjectMapper mapper = new ObjectMapper();
         ErrorInfo errorInfo = new ErrorInfo(e);
         String respJSONstring = "{}";
