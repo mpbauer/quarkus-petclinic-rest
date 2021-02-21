@@ -5,6 +5,9 @@ on:
     branches: [ develop ]
   workflow_dispatch:
 
+env:
+  SHORT_SHA_12: $(git rev-parse --short=12 ${{ github.sha }})
+
 jobs:
   jvm-build-job:
     runs-on: ubuntu-latest
@@ -42,13 +45,13 @@ jobs:
       - name: 'Build & publish Docker Image'
         run: |
           gcloud config set project ${{ secrets.GCP_PROJECT }}
-          gcloud builds submit --tag gcr.io/${{ secrets.GCP_PROJECT }}/quarkus-petclinic-rest-jvm:${GITHUB_SHA::12}-SNAPSHOT
+          gcloud builds submit --tag gcr.io/${{ secrets.GCP_PROJECT }}/quarkus-petclinic-rest-jvm:${{ env.SHORT_SHA_12 }}-SNAPSHOT
           gcloud config set run/region europe-west1
 
       # Deploy the Docker image to Google Cloud Run
       - name: 'Deploy to Cloud Run'
         run: |
-          gcloud run deploy quarkus-petclinic-rest-jvm-dev --image gcr.io/${{ secrets.GCP_PROJECT }}/quarkus-petclinic-rest-jvm:${GITHUB_SHA::12}-SNAPSHOT \
+          gcloud run deploy quarkus-petclinic-rest-jvm-dev --image gcr.io/${{ secrets.GCP_PROJECT }}/quarkus-petclinic-rest-jvm:${{ env.SHORT_SHA_12 }}-SNAPSHOT \
           --platform managed \
           --allow-unauthenticated \
           --set-env-vars "DB_USERNAME=${{ secrets.GCP_DB_USERNAME }}" \
@@ -99,13 +102,13 @@ jobs:
       - name: 'Build & publish Docker Image'
         run: |
           gcloud config set project ${{ secrets.GCP_PROJECT }}
-          gcloud builds submit --tag gcr.io/${{ secrets.GCP_PROJECT }}/quarkus-petclinic-rest-native:${GITHUB_SHA::12}-SNAPSHOT
+          gcloud builds submit --tag gcr.io/${{ secrets.GCP_PROJECT }}/quarkus-petclinic-rest-native:${{ env.SHORT_SHA_12 }}-SNAPSHOT
           gcloud config set run/region europe-west1
 
       # Deploy the Docker image to Google Cloud Run
       - name: 'Deploy to Cloud Run'
         run: |
-          gcloud run deploy quarkus-google-cloud-run-native --image gcr.io/${{ secrets.GCP_PROJECT }}/quarkus-petclinic-rest-native:${GITHUB_SHA::12}-SNAPSHOT \
+          gcloud run deploy quarkus-google-cloud-run-native --image gcr.io/${{ secrets.GCP_PROJECT }}/quarkus-petclinic-rest-native:${{ env.SHORT_SHA_12 }}-SNAPSHOT \
           --platform managed \
           --allow-unauthenticated \
           --set-env-vars "DB_USERNAME=${{ secrets.GCP_DB_USERNAME }}" \
