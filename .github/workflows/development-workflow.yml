@@ -51,7 +51,7 @@ jobs:
       # Deploy the Docker image to Google Cloud Run
       - name: 'Deploy to Cloud Run'
         run: |
-          gcloud run deploy quarkus-google-cloud-run --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/quarkus-petclinic-rest-jvm:${{ env.SHORT_SHA_12 }}-SNAPSHOT \
+          gcloud run deploy quarkus-petclinic-rest-jvm-dev --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/quarkus-petclinic-rest-jvm:${{ env.SHORT_SHA_12 }}-SNAPSHOT \
           --platform managed \
           --allow-unauthenticated \
           --set-env-vars "DB_USERNAME=${{ secrets.GCP_DB_USERNAME }}" \
@@ -109,7 +109,7 @@ jobs:
       # Deploy the Docker image to Google Cloud Run
       - name: 'Deploy to Cloud Run'
         run: |
-          gcloud run deploy quarkus-google-cloud-run-native --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/quarkus-petclinic-rest-native:${{ env.SHORT_SHA_12 }}-SNAPSHOT \
+          gcloud run deploy quarkus-petclinic-rest-native-dev --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/quarkus-petclinic-rest-native:${{ env.SHORT_SHA_12 }}-SNAPSHOT \
           --platform managed \
           --allow-unauthenticated \
           --set-env-vars "DB_USERNAME=${{ secrets.GCP_DB_USERNAME }}" \
