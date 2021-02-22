@@ -281,6 +281,7 @@ The following tutorial explains this in more detail: [link](https://cloud.google
 3) Go to [IAM & Admin](https://console.cloud.google.com/iam-admin/) > [Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts) and click `ADD`to create a new service account
 
 4) Enter a name and a description (optional) for your new service account and click `CREATE`
+    
     [![SETUP_GCP_SERVICE_ACCOUNT_01](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_01.png)](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_01.png)
 
 5) Add the following roles to your service account and click `DONE`. The third step is not necessary and can be skipped.
@@ -425,15 +426,24 @@ gcloud --quiet beta container --project "github-mpbauer" clusters create "petcli
 
 9) Create namespaces for the Petclinic application
 
-Create a Knative namespace for development
+Create a Knative namespace for native executables on `dev` stage
 ```
-kubectl create namespace petclinic-knative-dev
+kubectl create namespace petclinic-native-knative-dev
 ```
 
-Create a Knative namespace for production
-
+Create a Knative namespace for native images on `prod` stage
 ```
-kubectl create namespace petclinic-knative-prod
+kubectl create namespace petclinic-native-knative-prod
+```
+
+Create a Knative namespace for JVM images on `dev` stage
+```
+kubectl create namespace petclinic-jvm-knative-dev
+```
+
+Create a Knative namespace for JVM images on `prod` stage
+```
+kubectl create namespace petclinic-jvm-knative-prod
 ```
 
 ### Create a Service Account with [GCP Management Console](https://console.cloud.google.com/)
@@ -444,3 +454,22 @@ Add the following roles to your service account:
 - `Project Viewer`
 - `Kubernetes Engine Admin`
 - `Service Account User`
+
+### Knative Commands:
+
+Show details about all Knative Services:
+```
+kubectl get ksvc --all-namespaces
+```
+
+Show details about `quarkus-petclinic-rest application
+```
+kubectl get ksvc quarkus-petclinic-rest --namespace <CHOOSE NAMESPACE FROM LIST BELOW>
+```
+
+Available Namespaces:
+
+- `petclinic-native-knative-dev` - Namespace for Petclinic `development` containers running as a native executable
+- `petclinic-native-knative-prod` - Namespace for Petclinic `production` containers running as a native executable
+- `petclinic-native-knative-dev` - Namespace for Petclinic `development` containers running with a Java Virtual Machine (JVM)
+- `petclinic-native-knative-prod` - Namespace for Petclinic `production` containers running with a Java Virtual Machine (JVM)
