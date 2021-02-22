@@ -224,13 +224,13 @@ gcloud config set project $PROJECT_ID
 
 4) Enable the necessary services:
 ```
-gcloud services enable cloudbuild.googleapis.com run.googleapis.com containerregistry.googleapis.com
+gcloud services enable cloudbuild.googleapis.com run.googleapis.com containerregistry.googleapis.com container.googleapis.com
 ```
 
 5) Create a service account:
 ```
 gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
-  --description="Service Account for GitHub Actions of mpbauer/quarkus-petclinic-rest repository" \
+  --description="GitHub Actions service account for Petclinic repositories" \
   --display-name="$SERVICE_ACCOUNT_NAME"
 ```
 
@@ -238,18 +238,27 @@ gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
 ```
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
-  --role=roles/run.admin
-
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
-  --role=roles/storage.admin
+  --role=roles/cloudbuild.builds.editor
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
   --role=roles/iam.serviceAccountUser
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/run.admin
+ 
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/viewer
   
-# --role=roles/container.admin \
-# --role=roles/storage.admin
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/storage.admin
+  
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/container.admin  
 ```
 
 7) Generate a key.json file with your credentials, so your GitHub workflow can authenticate with Google Cloud. After issuing
@@ -275,19 +284,18 @@ The following tutorial explains this in more detail: [link](https://cloud.google
     [![SETUP_GCP_SERVICE_ACCOUNT_01](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_01.png)](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_01.png)
 
 5) Add the following roles to your service account and click `DONE`. The third step is not necessary and can be skipped.
-    - `Cloud Build Service Account`
-    - `Cloud Build Editor`
-    - `Service Account User`
-    - `Cloud Run Admin`
-    - `Viewer`
-    - `Storage Admin`
-    - `Container Admin`
-    
-    
-    Link: https://towardsdatascience.com/deploy-to-google-cloud-run-using-github-actions-590ecf957af0
 
-    > Explanation of the Viewer Role: 
+   - `Cloud Build Editor (roles/cloudbuild.builds.editor)` -  Required for Cloud Build
+   - `Service Account User (roles/iam.serviceAccountUser)` - General Service Account permissions
+   - `Cloud Run Admin (roles/run.admin)` - Required for Cloud Run
+   - `Viewer (roles/viewer)` - Required as a workaround for successful deployments in GitHub Actions (see explanation below)
+   - `Storage Admin (roles/storage.admin)` - Required for Container Registry
+   - `Kubernetes Engine Admin (roles/container.admin)` - Required for GKE deployments
+    
+    
+    > Explanation of the Viewer Role:
     >
+    > Link: https://towardsdatascience.com/deploy-to-google-cloud-run-using-github-actions-590ecf957af0
     > Once the service account is created you will need to select the following roles. I tried a number of different ways to remove the very permissive project viewer role, but at the time of this writing this your service account will need this role or the deployment will appear to fail in Github even if it is successfully deployed to Cloud Run.
 
    [![SETUP_GCP_SERVICE_ACCOUNT_02](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_02.png)](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_02.png)
@@ -348,7 +356,7 @@ gcloud auth login
 gcloud config set project $PROJECT_ID
 ```
 
-4) Enable the necessary services:
+4) Enable the necessary services (if not already enabled):
 ```
 gcloud services enable container.googleapis.com
 ```
@@ -360,7 +368,7 @@ gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
   --display-name="$SERVICE_ACCOUNT_NAME"
 ```
 
-6) Give the service account Cloud Run Admin, Storage Admin, and Service Account User roles. You can’t set all of them at once, so you have to run separate commands:
+6) Give the service account pre-defined user roles. You can’t set all of them at once, so you have to run separate commands:
 ```
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
