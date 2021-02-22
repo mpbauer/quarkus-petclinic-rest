@@ -230,8 +230,8 @@ gcloud services enable cloudbuild.googleapis.com run.googleapis.com containerreg
 5) Create a service account:
 ```
 gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
-  --description="Cloud Run deploy account" \
-  --display-name="Cloud-Run-Deploy"
+  --description="Service Account for GitHub Actions of mpbauer/quarkus-petclinic-rest repository" \
+  --display-name="$SERVICE_ACCOUNT_NAME"
 ```
 
 6) Give the service account Cloud Run Admin, Storage Admin, and Service Account User roles. You can’t set all of them at once, so you have to run separate commands:
@@ -247,6 +247,9 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
   --role=roles/iam.serviceAccountUser
+  
+# --role=roles/container.admin \
+# --role=roles/storage.admin
 ```
 
 7) Generate a key.json file with your credentials, so your GitHub workflow can authenticate with Google Cloud. After issuing
@@ -278,6 +281,8 @@ The following tutorial explains this in more detail: [link](https://cloud.google
     - `Cloud Run Admin`
     - `Viewer`
     - `Storage Admin`
+    - `Container Admin`
+    
     
     Link: https://towardsdatascience.com/deploy-to-google-cloud-run-using-github-actions-590ecf957af0
 
@@ -315,3 +320,106 @@ In the end your secrets should look like this:
 ## Amazon Web Services (AWS)
 
 > :construction: This section is currently under heavy construction. Please check again later!
+
+## Kubernetes with Knative
+
+### Setup Cluster
+
+### Create a Service Account with `gcloud`
+
+1) Export these environment variables so that you can copy and paste the following commands:
+```
+export PROJECT_ID=<YOUR PROJECT ID>
+export SERVICE_ACCOUNT_NAME=<ENTER A NAME FOR YOUR SERVICE ACCOUNT>
+```
+
+````
+export PROJECT_ID=github-mpbauer
+export SERVICE_ACCOUNT_NAME=gke-petclinic
+````
+
+2) Log in with your Google account:
+```
+gcloud auth login
+```
+
+3) Select the project configured via `$PROJECT_ID`:
+```
+gcloud config set project $PROJECT_ID
+```
+
+4) Enable the necessary services:
+```
+gcloud services enable container.googleapis.com
+```
+
+5) Create a service account:
+```
+gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
+  --description="Service Account for Petclinic GKE Cluster" \
+  --display-name="$SERVICE_ACCOUNT_NAME"
+```
+
+6) Give the service account Cloud Run Admin, Storage Admin, and Service Account User roles. You can’t set all of them at once, so you have to run separate commands:
+```
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/compute.viewer
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/viewer
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/container.admin
+  
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/iam.serviceAccountUser
+```
+
+7) Generate a key.json file with your credentials, so your GitHub workflow can authenticate with Google Cloud. After issuing
+   the following command you can find the generated key in your current folder.
+```
+gcloud iam service-accounts keys create key.json \
+    --iam-account $SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com
+```
+
+8) Create GKE Cluster
+
+```
+gcloud --quiet beta container --project "github-mpbauer" clusters create "petclinic-cluster" \
+ --zone "europe-west1-d" \
+ --no-enable-basic-auth \
+ --release-channel regular \
+ --machine-type "n2-standard-4" \
+ --image-type "COS_CONTAINERD" \
+ --disk-type "pd-ssd" \
+ --disk-size "100" \
+ --metadata disable-legacy-endpoints=true \
+ --service-account "gke-petclinic@github-mpbauer.iam.gserviceaccount.com" \
+ --num-nodes "1" \
+ --enable-stackdriver-kubernetes \
+ --enable-ip-alias \
+ --network "projects/github-mpbauer/global/networks/default" \
+ --subnetwork "projects/github-mpbauer/regions/europe-west1/subnetworks/default" \
+ --default-max-pods-per-node "110" \
+ --no-enable-master-authorized-networks \
+ --addons HorizontalPodAutoscaling,HttpLoadBalancing,GcePersistentDiskCsiDriver \
+ --enable-autoupgrade \
+ --enable-autorepair \
+ --max-surge-upgrade 1 \
+ --max-unavailable-upgrade 0 \
+ --enable-shielded-nodes \
+ --node-locations "europe-west1-d"
+```
+
+### Create a Service Account with [GCP Management Console](https://console.cloud.google.com/)
+
+Add the following roles to your service account:
+
+- `Compute Viewer`
+- `Project Viewer`
+- `Kubernetes Engine Admin`
+- `Service Account User`
