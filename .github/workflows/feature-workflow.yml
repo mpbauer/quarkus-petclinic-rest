@@ -80,7 +80,6 @@ jobs:
       # Deploy to GKE cluster
       - name: 'Deploy to GKE Cluster'
         run: |
-          gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }} --project ${{ secrets.GCP_PROJECT_ID }}
           ./kustomize edit set image gcr.io/PROJECT_ID/IMAGE:TAG=gcr.io/${{ secrets.GCP_PROJECT_ID }}/quarkus-petclinic-rest-jvm:${{ env.SHORT_SHA_12 }}-EXPERIMENTAL
           ./kustomize edit set namespace petclinic-knative-dev
           ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-host=${{ secrets.GCP_DB_HOST }}
