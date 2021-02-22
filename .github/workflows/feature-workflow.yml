@@ -82,12 +82,12 @@ jobs:
         run: |
           gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }} --project ${{ secrets.GCP_PROJECT_ID }}
           ./kustomize edit set image gcr.io/PROJECT_ID/IMAGE:TAG=gcr.io/${{ secrets.GCP_PROJECT_ID }}/quarkus-petclinic-rest-jvm:${{ env.SHORT_SHA_12 }}-SNAPSHOT
-          ./kustomize edit set namespace petclinic-dev
-          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-host=${{ env.GCP_DB_HOST }}
-          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-port=${{ env.GCP_DB_PORT }}
-          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-database=${{ env.GCP_DB_DATABASE }}
-          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-username=${{ env.GCP_DB_USERNAME }}
-          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-password=${{ env.GCP_DB_PASSWORD }}
+          ./kustomize edit set namespace petclinic-knative-dev
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-host=${{ secrets.GCP_DB_HOST }}
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-port=${{ secrets.GCP_DB_PORT }}
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-database=${{ secrets.GCP_DB_DATABASE }}
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-username=${{ secrets.GCP_DB_USERNAME }}
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-password=${{ secrets.GCP_DB_PASSWORD }}
           ./kustomize build . | kubectl apply -f -
 
 #  native-image-build-job:

@@ -423,6 +423,19 @@ gcloud --quiet beta container --project "github-mpbauer" clusters create "petcli
  --node-locations "europe-west1-d"
 ```
 
+9) Create namespaces for the Petclinic application
+
+Create a Knative namespace for development
+```
+kubectl create namespace petclinic-knative-dev
+```
+
+Create a Knative namespace for production
+
+```
+kubectl create namespace petclinic-knative-prod
+```
+
 ### Create a Service Account with [GCP Management Console](https://console.cloud.google.com/)
 
 Add the following roles to your service account:
