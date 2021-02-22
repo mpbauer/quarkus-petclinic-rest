@@ -224,29 +224,41 @@ gcloud config set project $PROJECT_ID
 
 4) Enable the necessary services:
 ```
-gcloud services enable cloudbuild.googleapis.com run.googleapis.com containerregistry.googleapis.com
+gcloud services enable cloudbuild.googleapis.com run.googleapis.com containerregistry.googleapis.com container.googleapis.com
 ```
 
 5) Create a service account:
 ```
 gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
-  --description="Cloud Run deploy account" \
-  --display-name="Cloud-Run-Deploy"
+  --description="GitHub Actions service account for Petclinic repositories" \
+  --display-name="$SERVICE_ACCOUNT_NAME"
 ```
 
 6) Give the service account Cloud Run Admin, Storage Admin, and Service Account User roles. You can’t set all of them at once, so you have to run separate commands:
 ```
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
-  --role=roles/run.admin
-
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
-  --role=roles/storage.admin
+  --role=roles/cloudbuild.builds.editor
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
   --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
   --role=roles/iam.serviceAccountUser
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/run.admin
+ 
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/viewer
+  
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/storage.admin
+  
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/container.admin  
 ```
 
 7) Generate a key.json file with your credentials, so your GitHub workflow can authenticate with Google Cloud. After issuing
@@ -269,20 +281,22 @@ The following tutorial explains this in more detail: [link](https://cloud.google
 3) Go to [IAM & Admin](https://console.cloud.google.com/iam-admin/) > [Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts) and click `ADD`to create a new service account
 
 4) Enter a name and a description (optional) for your new service account and click `CREATE`
+    
     [![SETUP_GCP_SERVICE_ACCOUNT_01](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_01.png)](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_01.png)
 
 5) Add the following roles to your service account and click `DONE`. The third step is not necessary and can be skipped.
-    - `Cloud Build Service Account`
-    - `Cloud Build Editor`
-    - `Service Account User`
-    - `Cloud Run Admin`
-    - `Viewer`
-    - `Storage Admin`
-    
-    Link: https://towardsdatascience.com/deploy-to-google-cloud-run-using-github-actions-590ecf957af0
 
-    > Explanation of the Viewer Role: 
+   - `Cloud Build Editor (roles/cloudbuild.builds.editor)` -  Required for Cloud Build
+   - `Service Account User (roles/iam.serviceAccountUser)` - General Service Account permissions
+   - `Cloud Run Admin (roles/run.admin)` - Required for Cloud Run
+   - `Viewer (roles/viewer)` - Required as a workaround for successful deployments in GitHub Actions (see explanation below)
+   - `Storage Admin (roles/storage.admin)` - Required for Container Registry
+   - `Kubernetes Engine Admin (roles/container.admin)` - Required for GKE deployments
+    
+    
+    > Explanation of the Viewer Role:
     >
+    > Link: https://towardsdatascience.com/deploy-to-google-cloud-run-using-github-actions-590ecf957af0
     > Once the service account is created you will need to select the following roles. I tried a number of different ways to remove the very permissive project viewer role, but at the time of this writing this your service account will need this role or the deployment will appear to fail in Github even if it is successfully deployed to Cloud Run.
 
    [![SETUP_GCP_SERVICE_ACCOUNT_02](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_02.png)](docs/screenshots/setup-gcp-service-account/setup_gcp_service_account_02.png)
@@ -315,3 +329,147 @@ In the end your secrets should look like this:
 ## Amazon Web Services (AWS)
 
 > :construction: This section is currently under heavy construction. Please check again later!
+
+## Kubernetes with Knative
+
+### Setup Cluster
+
+### Create a Service Account with `gcloud`
+
+1) Export these environment variables so that you can copy and paste the following commands:
+```
+export PROJECT_ID=<YOUR PROJECT ID>
+export SERVICE_ACCOUNT_NAME=<ENTER A NAME FOR YOUR SERVICE ACCOUNT>
+```
+
+````
+export PROJECT_ID=github-mpbauer
+export SERVICE_ACCOUNT_NAME=gke-petclinic
+````
+
+2) Log in with your Google account:
+```
+gcloud auth login
+```
+
+3) Select the project configured via `$PROJECT_ID`:
+```
+gcloud config set project $PROJECT_ID
+```
+
+4) Enable the necessary services (if not already enabled):
+```
+gcloud services enable container.googleapis.com
+```
+
+5) Create a service account:
+```
+gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME \
+  --description="Service Account for Petclinic GKE Cluster" \
+  --display-name="$SERVICE_ACCOUNT_NAME"
+```
+
+6) Give the service account pre-defined user roles. You can’t set all of them at once, so you have to run separate commands:
+```
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/compute.viewer
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/viewer
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/container.admin
+  
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --role=roles/iam.serviceAccountUser
+```
+
+7) Generate a key.json file with your credentials, so your GitHub workflow can authenticate with Google Cloud. After issuing
+   the following command you can find the generated key in your current folder.
+```
+gcloud iam service-accounts keys create key.json \
+    --iam-account $SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com
+```
+
+8) Create GKE Cluster
+
+```
+gcloud --quiet beta container --project "github-mpbauer" clusters create "petclinic-cluster" \
+ --zone "europe-west1-d" \
+ --no-enable-basic-auth \
+ --release-channel regular \
+ --machine-type "n2-standard-4" \
+ --image-type "COS_CONTAINERD" \
+ --disk-type "pd-ssd" \
+ --disk-size "100" \
+ --metadata disable-legacy-endpoints=true \
+ --service-account "gke-petclinic@github-mpbauer.iam.gserviceaccount.com" \
+ --num-nodes "1" \
+ --enable-stackdriver-kubernetes \
+ --enable-ip-alias \
+ --network "projects/github-mpbauer/global/networks/default" \
+ --subnetwork "projects/github-mpbauer/regions/europe-west1/subnetworks/default" \
+ --default-max-pods-per-node "110" \
+ --no-enable-master-authorized-networks \
+ --addons HorizontalPodAutoscaling,HttpLoadBalancing,GcePersistentDiskCsiDriver \
+ --enable-autoupgrade \
+ --enable-autorepair \
+ --max-surge-upgrade 1 \
+ --max-unavailable-upgrade 0 \
+ --enable-shielded-nodes \
+ --node-locations "europe-west1-d"
+```
+
+9) Create namespaces for the Petclinic application
+
+Create a Knative namespace for native executables on `dev` stage
+```
+kubectl create namespace petclinic-native-knative-dev
+```
+
+Create a Knative namespace for native images on `prod` stage
+```
+kubectl create namespace petclinic-native-knative-prod
+```
+
+Create a Knative namespace for JVM images on `dev` stage
+```
+kubectl create namespace petclinic-jvm-knative-dev
+```
+
+Create a Knative namespace for JVM images on `prod` stage
+```
+kubectl create namespace petclinic-jvm-knative-prod
+```
+
+### Create a Service Account with [GCP Management Console](https://console.cloud.google.com/)
+
+Add the following roles to your service account:
+
+- `Compute Viewer`
+- `Project Viewer`
+- `Kubernetes Engine Admin`
+- `Service Account User`
+
+### Knative Commands:
+
+Show details about all Knative Services:
+```
+kubectl get ksvc --all-namespaces
+```
+
+Show details about `quarkus-petclinic-rest application
+```
+kubectl get ksvc quarkus-petclinic-rest --namespace <CHOOSE NAMESPACE FROM LIST BELOW>
+```
+
+Available Namespaces:
+
+- `petclinic-native-knative-dev` - Namespace for Petclinic `development` containers running as a native executable
+- `petclinic-native-knative-prod` - Namespace for Petclinic `production` containers running as a native executable
+- `petclinic-native-knative-dev` - Namespace for Petclinic `development` containers running with a Java Virtual Machine (JVM)
+- `petclinic-native-knative-prod` - Namespace for Petclinic `production` containers running with a Java Virtual Machine (JVM)

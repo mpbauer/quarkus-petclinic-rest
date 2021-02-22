@@ -13,7 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Clone git project
-      - uses: actions/checkout@v2
+      - name: 'Clone Git Project'
+        uses: actions/checkout@v2
 
       # Set up JDK 11
       - name: 'Set up JDK 11'
@@ -25,17 +26,18 @@ jobs:
       - name: 'Build & Test'
         run: mvn clean package
 
-      # Setup Google Cloud SDK
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      # Setup up Google Cloud SDK
+      - name: 'Set up Google Cloud SDK'
+        uses: google-github-actions/setup-gcloud@v0.2.0
         with:
-          service_account_email: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS }}
           export_default_credentials: true
 
-      # Configure Docker with Google Cloud Credentials
-      - name: 'Configure Docker'
+      # Configure docker to use the gcloud command-line tool as a credential helper
+      - name: 'Configure Docker Credentials'
         run: |
-          gcloud auth configure-docker
+          gcloud --quiet auth configure-docker
 
       # Move Dockerfile with JVM Runtime to the projects root directory
       - name: 'Copy Dockerfile with JVM Runtime'
@@ -61,6 +63,31 @@ jobs:
           --set-env-vars "DB_DATABASE=${{ secrets.GCP_DB_DATABASE }}" \
           --memory 512M
 
+      # Get the GKE credentials so we can deploy to the cluster
+      - name: 'Get GKE Credentials'
+        uses: google-github-actions/get-gke-credentials@v0.2.1
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
+          credentials: ${{ secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS }}
+
+      # Set up Kustomize
+      - name: 'Set up Kustomize'
+        run: |-
+          curl --location https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.0.1/kustomize_v4.0.1_linux_amd64.tar.gz | tar -xz
+          chmod u+x ./kustomize
+
+      # Deploy to GKE cluster
+      - name: 'Deploy to GKE Cluster'
+        run: |
+          ./kustomize edit set image gcr.io/PROJECT_ID/IMAGE:TAG=gcr.io/${{ secrets.GCP_PROJECT_ID }}/quarkus-petclinic-rest-jvm:${{ env.SHORT_SHA_12 }}-RELEASE
+          ./kustomize edit set namespace petclinic-jvm-knative-prod
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-host=${{ secrets.GCP_DB_HOST }}
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-port=${{ secrets.GCP_DB_PORT }}
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-database=${{ secrets.GCP_DB_DATABASE }}
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-username=${{ secrets.GCP_DB_USERNAME }}
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-password=${{ secrets.GCP_DB_PASSWORD }}
+          ./kustomize build . | kubectl apply -f -
 
   native-image-build-job:
     runs-on: ubuntu-latest
@@ -83,10 +110,11 @@ jobs:
       - name: 'Build & Test Native Image'
         run: mvn package -Pnative
 
-      # Set up Google Cloud SDK
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      # Setup up Google Cloud SDK
+      - name: 'Set up Google Cloud SDK'
+        uses: google-github-actions/setup-gcloud@v0.2.0
         with:
-          service_account_email: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS }}
           export_default_credentials: true
 
@@ -118,3 +146,29 @@ jobs:
           --set-env-vars "DB_PORT=${{ secrets.GCP_DB_PORT }}" \
           --set-env-vars "DB_DATABASE=${{ secrets.GCP_DB_DATABASE }}" \
           --memory 512M
+
+      # Get the GKE credentials so we can deploy to the cluster
+      - name: 'Get GKE Credentials'
+        uses: google-github-actions/get-gke-credentials@v0.2.1
+        with:
+          cluster_name: ${{ secrets.GKE_CLUSTER }}
+          location: ${{ secrets.GKE_ZONE }}
+          credentials: ${{ secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS }}
+
+      # Set up Kustomize
+      - name: 'Set up Kustomize'
+        run: |-
+          curl --location https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.0.1/kustomize_v4.0.1_linux_amd64.tar.gz | tar -xz
+          chmod u+x ./kustomize
+
+      # Deploy to GKE cluster
+      - name: 'Deploy to GKE Cluster'
+        run: |
+          ./kustomize edit set image gcr.io/PROJECT_ID/IMAGE:TAG=gcr.io/${{ secrets.GCP_PROJECT_ID }}/quarkus-petclinic-rest-jvm:${{ env.SHORT_SHA_12 }}-RELEASE
+          ./kustomize edit set namespace petclinic-native-knative-prod
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-host=${{ secrets.GCP_DB_HOST }}
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-port=${{ secrets.GCP_DB_PORT }}
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-database=${{ secrets.GCP_DB_DATABASE }}
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-username=${{ secrets.GCP_DB_USERNAME }}
+          ./kustomize edit add secret quarkus-petclinic-rest-credentials --from-literal=db-password=${{ secrets.GCP_DB_PASSWORD }}
+          ./kustomize build . | kubectl apply -f -
