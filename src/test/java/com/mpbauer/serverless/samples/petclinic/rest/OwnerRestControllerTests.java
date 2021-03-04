@@ -134,7 +134,6 @@ class OwnerRestControllerTests extends AbstractIntegrationTest {
             .body("firstName", equalTo("George"));
     }
 
-    //@WithMockUser(roles = "OWNER_ADMIN")
     @Test
     void testGetOwnerNotFound() {
         given(this.clinicService.findOwnerById(-1)).willReturn(null);
@@ -148,7 +147,6 @@ class OwnerRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles = "OWNER_ADMIN")
     void testGetOwnersListSuccess() {
         owners.remove(0);
         owners.remove(1);
@@ -167,7 +165,6 @@ class OwnerRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles = "OWNER_ADMIN")
     void testGetOwnersListNotFound() {
         owners.clear();
         given(this.clinicService.findOwnerByLastName("0")).willReturn(owners);
@@ -181,7 +178,6 @@ class OwnerRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles = "OWNER_ADMIN")
     void testGetAllOwnersSuccess() {
         owners.remove(0);
         owners.remove(1);
@@ -200,7 +196,6 @@ class OwnerRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles = "OWNER_ADMIN")
     void testGetAllOwnersNotFound() {
         owners.clear();
         given(this.clinicService.findAllOwners()).willReturn(owners);
@@ -214,7 +209,6 @@ class OwnerRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles = "OWNER_ADMIN")
     void testCreateOwnerErrorIdSpecified() throws Exception {
         Owner newOwner = owners.get(0);
         newOwner.setId(999);
@@ -234,7 +228,6 @@ class OwnerRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles = "OWNER_ADMIN")
     void testCreateOwnerError() throws Exception {
         Owner newOwner = owners.get(0);
         newOwner.setId(null);
@@ -254,7 +247,6 @@ class OwnerRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles = "OWNER_ADMIN")
     void testUpdateOwnerSuccess() throws Exception {
         given(this.clinicService.findOwnerById(1)).willReturn(owners.get(0));
         int ownerId = owners.get(0).getId();
@@ -293,7 +285,6 @@ class OwnerRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles = "OWNER_ADMIN")
     void testUpdateOwnerSuccessNoBodyId() throws Exception {
         given(this.clinicService.findOwnerById(1)).willReturn(owners.get(0));
         int ownerId = owners.get(0).getId();
@@ -330,7 +321,6 @@ class OwnerRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles = "OWNER_ADMIN")
     void testUpdateOwnerErrorBodyIdMismatchWithPathId() throws Exception {
         int ownerId = owners.get(0).getId();
         Owner updatedOwner = new Owner();
@@ -357,7 +347,6 @@ class OwnerRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles = "OWNER_ADMIN")
     void testUpdateOwnerError() throws Exception {
         Owner newOwner = owners.get(0);
         newOwner.setFirstName("");
@@ -377,7 +366,6 @@ class OwnerRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles = "OWNER_ADMIN")
     void testDeleteOwnerSuccess() throws Exception {
         Owner newOwner = owners.get(0);
         ObjectMapper mapper = new ObjectMapper();
@@ -396,7 +384,6 @@ class OwnerRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles = "OWNER_ADMIN")
     void testDeleteOwnerError() throws Exception {
         Owner newOwner = owners.get(0);
         ObjectMapper mapper = new ObjectMapper();

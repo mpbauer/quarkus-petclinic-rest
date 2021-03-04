@@ -2,7 +2,6 @@ package com.mpbauer.serverless.samples.petclinic.security;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.smallrye.jwt.build.Jwt;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -28,40 +27,36 @@ class GenerateTokenTest {
     @Test
     void generateOwnerAdminToken() {
         String token = Jwt.groups(Roles.OWNER_ADMIN)
+            .subject("X00001")
             .expiresIn(TOKEN_EXPIRATION)
             .sign();
-
-        Assertions.assertNotNull(token);
         System.out.println(token);
     }
 
     @Test
     void generateVetAdminToken() {
         String token = Jwt.groups(Roles.VET_ADMIN)
+            .subject("X00002")
             .expiresIn(TOKEN_EXPIRATION)
             .sign();
-
-        Assertions.assertNotNull(token);
         System.out.println(token);
     }
 
     @Test
     void generateAdminToken() {
         String token = Jwt.groups(Roles.ADMIN)
+            .subject("X00003")
             .expiresIn(TOKEN_EXPIRATION)
             .sign();
-
-        Assertions.assertNotNull(token);
         System.out.println(token);
     }
 
     @Test
     void generateTokenWithAllRoles() {
         String token = Jwt.groups(new HashSet<>(Arrays.asList(Roles.ADMIN, Roles.OWNER_ADMIN, Roles.VET_ADMIN)))
+            .subject("X00004")
             .expiresIn(TOKEN_EXPIRATION)
             .sign();
-
-        Assertions.assertNotNull(token);
         System.out.println(token);
     }
 }

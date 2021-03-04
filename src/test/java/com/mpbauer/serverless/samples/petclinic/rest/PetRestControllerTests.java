@@ -90,7 +90,6 @@ class PetRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles="OWNER_ADMIN")
     void testGetPetSuccess() throws Exception {
         given(this.clinicService.findPetById(3)).willReturn(pets.get(0));
         given()
@@ -106,7 +105,6 @@ class PetRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles="OWNER_ADMIN")
     void testGetPetNotFound() throws Exception {
         given(this.clinicService.findPetById(-1)).willReturn(null);
         given()
@@ -119,7 +117,6 @@ class PetRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles="OWNER_ADMIN")
     void testGetAllPetsSuccess() throws Exception {
         given(this.clinicService.findAllPets()).willReturn(pets);
         given()
@@ -137,7 +134,6 @@ class PetRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles="OWNER_ADMIN")
     void testGetAllPetsNotFound() throws Exception {
         pets.clear();
         given(this.clinicService.findAllPets()).willReturn(pets);
@@ -151,7 +147,6 @@ class PetRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles="OWNER_ADMIN")
     void testCreatePetSuccess() throws Exception {
         Pet newPet = pets.get(0);
         newPet.setId(999);
@@ -170,7 +165,6 @@ class PetRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles="OWNER_ADMIN")
     void testCreatePetError() throws Exception {
         Pet newPet = pets.get(0);
         newPet.setId(null);
@@ -191,7 +185,6 @@ class PetRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles="OWNER_ADMIN")
     void testUpdatePetSuccess() throws Exception {
         given(this.clinicService.findPetById(3)).willReturn(pets.get(0));
         Pet newPet = pets.get(0);
@@ -222,7 +215,6 @@ class PetRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles="OWNER_ADMIN")
     void testUpdatePetError() throws Exception {
         Pet newPet = pets.get(0);
         newPet.setName("");
@@ -241,7 +233,6 @@ class PetRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles="OWNER_ADMIN")
     void testDeletePetSuccess() throws Exception {
         Pet newPet = pets.get(0);
         ObjectMapper mapper = new ObjectMapper();
@@ -259,7 +250,6 @@ class PetRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-        //@WithMockUser(roles="OWNER_ADMIN")
     void testDeletePetError() throws Exception {
         Pet newPet = pets.get(0);
         ObjectMapper mapper = new ObjectMapper();
