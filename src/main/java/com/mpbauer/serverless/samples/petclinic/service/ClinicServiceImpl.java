@@ -15,7 +15,6 @@
  */
 package com.mpbauer.serverless.samples.petclinic.service;
 
-import com.mpbauer.serverless.samples.petclinic.config.LoggingFilter;
 import com.mpbauer.serverless.samples.petclinic.model.*;
 import com.mpbauer.serverless.samples.petclinic.repository.*;
 import io.quarkus.cache.CacheResult;
@@ -82,8 +81,7 @@ public class ClinicServiceImpl implements ClinicService {
         try {
             visit = visitRepository.findById(visitId);
         } catch (Exception e) {
-            LOG.warn("An unexpected exception occured", e);
-            // TODO try to catch a more generic exception to not accidentally swallow important exceptions
+            LOG.warn("An unexpected exception occurred", e);
             // just ignore not found exceptions for Jdbc/Jpa realization
             return null;
         }
@@ -109,8 +107,7 @@ public class ClinicServiceImpl implements ClinicService {
         try {
             vet = vetRepository.findById(id);
         } catch (Exception e) {
-            LOG.warn("An unexpected exception occured", e);
-            // TODO try to catch a more generic exception to not accidentally swallow important exceptions
+            LOG.warn("An unexpected exception occurred", e);
             // just ignore not found exceptions for Jdbc/Jpa realization
             return null;
         }
@@ -154,8 +151,7 @@ public class ClinicServiceImpl implements ClinicService {
         try {
             petType = petTypeRepository.findById(petTypeId);
         } catch (Exception e) {
-            LOG.warn("An unexpected exception occured", e);
-            // TODO try to catch a more generic exception to not accidentally swallow important exceptions
+            LOG.warn("An unexpected exception occurred", e);
             // just ignore not found exceptions for Jdbc/Jpa realization
             return null;
         }
@@ -187,9 +183,7 @@ public class ClinicServiceImpl implements ClinicService {
         try {
             specialty = specialtyRepository.findById(specialtyId);
         } catch (Exception e) {
-            LOG.warn("An unexpected exception occured", e);
-
-            // TODO try to catch a more generic exception to not accidentally swallow important exceptions
+            LOG.warn("An unexpected exception occurred", e);
             // just ignore not found exceptions for Jdbc/Jpa realization
             return null;
         }
@@ -227,9 +221,7 @@ public class ClinicServiceImpl implements ClinicService {
         try {
             owner = ownerRepository.findById(id);
         } catch (Exception e) {
-            LOG.warn("An unexpected exception occured", e);
-
-            // TODO try to catch a more generic exception to not accidentally swallow important exceptions
+            LOG.warn("An unexpected exception occurred", e);
             // just ignore not found exceptions for Jdbc/Jpa realization
             return null;
         }
@@ -243,9 +235,7 @@ public class ClinicServiceImpl implements ClinicService {
         try {
             pet = petRepository.findById(id);
         } catch (Exception e) {
-            LOG.warn("An unexpected exception occured", e);
-
-            // TODO try to catch a more generic exception to not accidentally swallow important exceptions
+            LOG.warn("An unexpected exception occurred", e);
             // just ignore not found exceptions for Jdbc/Jpa realization
             return null;
         }

@@ -46,7 +46,6 @@ public interface OwnerRepository {
      *
      * @param id the id to search for
      * @return the <code>Owner</code> if found
-     * @throws //org.springframework.dao.DataRetrievalFailureException if not found //TODO
      */
     Owner findById(int id);
 

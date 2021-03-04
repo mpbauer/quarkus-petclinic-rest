@@ -164,13 +164,12 @@ docker run --name petclinic -p 5432:5432 -e POSTGRES_PASSWORD=pass -d postgres
 
 ## Security configuration
 
-In its default configuration, Petclinic doesn't have authentication and authorization enabled
+A Role Based Access Control is enabled by default when running the application with the `prod` and `test` profile. When you start the
+application in `dev` through `./mvnw quarkus:dev` authentication is disabled by default.
 
-> :construction: This section is currently under heavy construction. At the moment JWT based authentication is not implemented yet
+### Disable Authentication
 
-### Enable Authentication
-
-In order to use the JWT based authentication functionality, you can turn it on by setting the following property 
+In order to disable access control, you can turn it off by setting the following property 
 in the `application.properties` file:
 ```
 petclinic.security.enable=false
@@ -187,6 +186,92 @@ Role         | Controller
 OWNER_ADMIN  | OwnerController<br/>PetController<br/>PetTypeController (`getAllPetTypes()` & `getPetType()`)
 VET_ADMIN    | PetTypeController<br/>SpecialityController</br>VetController
 ADMIN        | UserController
+
+### Roles Based Access Control with predefined JSON Web Tokens
+
+To make the use of this sample application as easy as possible a set of fixed JSON Web Tokens with different roles were
+generated and signed with a private key that is located in `src/test/resources/privateKey.pem`. You can copy the token and
+pass it via the `Authorization` header to the application.
+
+**Example:**
+```shell
+curl --location --request GET 'http://localhost:8080/petclinic/api/owners' \
+--header 'Content-Type: application/json' \
+--header 'Accept: application/json' \
+--header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJncm91cHMiOlsiUk9MRV9PV05FUl9BRE1JTiJdLCJpYXQiOjE2MTQ4NTMxNDksImV4cCI6NDc3MDUyNjc0OSwianRpIjoiMGEwODZmZjItYjVmNC00MGQxLWEyZDUtMmM0YjA0ZTBkMDBhIiwiaXNzIjoiaHR0cHM6Ly9zcHJpbmctcGV0Y2xpbmljLmdpdGh1Yi5pby9pc3N1ZXIifQ.V0qEDupr5uOdi-re233jMEOWhP4w_yvCgWUrEapOcz-2WLe64fjvGFAXlpvdfjcslCGCSofB97CnQ8xzx0QPdWpDKN7E2b_JTYb7wFsrI71nIblw-2n7uyKFGKgSbjd4L7BNIbUP6Pcodgn1FsDZ6HPfJlEqWMf_ZEyZi9hA3qfPgpSgt9iQgW88gkyRZv7tJUwhr0ZY4qNB6ujbZtBF4Er0Wvm8VqR2_KK8PaKk2ydGnsTDmrPaXSVmTH0ZMMwMRrmM4OvT-WZdpcAzakA4adDBPC6URM_GIzKfVMZ3oVbUwBj6HOybbX8R9VSXegTfZTio1J-dF5fXlFYYILktpg'
+```
+
+> :exclamation: IMPORTANT: Never push a private key in a Git repository. In case you do, make sure do add additional 
+> security by encrypting security relevant data first before you push them. This application is just for showcasing
+> the use of JSON Web Tokens in the Petclinic application but it should never be done this way for real applications.
+
+#### List of valid JSON Web Tokens:
+
+Role: `OWNER_ADMIN`
+```
+eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJncm91cHMiOlsiUk9MRV9PV05FUl9BRE1JTiJdLCJpYXQiOjE2MTQ4NTMxNDksImV4cCI6NDc3MDUyNjc0OSwianRpIjoiMGEwODZmZjItYjVmNC00MGQxLWEyZDUtMmM0YjA0ZTBkMDBhIiwiaXNzIjoiaHR0cHM6Ly9zcHJpbmctcGV0Y2xpbmljLmdpdGh1Yi5pby9pc3N1ZXIifQ.V0qEDupr5uOdi-re233jMEOWhP4w_yvCgWUrEapOcz-2WLe64fjvGFAXlpvdfjcslCGCSofB97CnQ8xzx0QPdWpDKN7E2b_JTYb7wFsrI71nIblw-2n7uyKFGKgSbjd4L7BNIbUP6Pcodgn1FsDZ6HPfJlEqWMf_ZEyZi9hA3qfPgpSgt9iQgW88gkyRZv7tJUwhr0ZY4qNB6ujbZtBF4Er0Wvm8VqR2_KK8PaKk2ydGnsTDmrPaXSVmTH0ZMMwMRrmM4OvT-WZdpcAzakA4adDBPC6URM_GIzKfVMZ3oVbUwBj6HOybbX8R9VSXegTfZTio1J-dF5fXlFYYILktpg
+```
+
+Role: `VET_ADMIN`
+```
+eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJncm91cHMiOlsiUk9MRV9WRVRfQURNSU4iXSwiaWF0IjoxNjE0ODUzNDU0LCJleHAiOjQ3NzA1MjcwNTQsImp0aSI6ImYwODdmZTM4LWZlNGEtNGY4Yy1hZDUzLTdkYTE3NTk0MTkyMyIsImlzcyI6Imh0dHBzOi8vc3ByaW5nLXBldGNsaW5pYy5naXRodWIuaW8vaXNzdWVyIn0.OjeAlYwEq6ut_dunIT2YRwgLvtpryyvcWTfh7flCDpBCX9sD-CBXiEy_M-ixFHN1RQg4RXHkxk1iRIIA13F_Uyp_0vfv4X8KxVogIeiIngSttUrTAQ86Xq3nH4PHJjmprgQfJcPuXXYqvYblXaNCccjU7kreggP3uZvNVdPTnGlpbgJgh5fKeHx6q0zI8nvV3EUas97uqnTr3quproK85QY2JZhR1BiWGzUZ3EvFjgBwuo57fQ_PuC-VMeVRo-m9_DFRK_RFShUJoCaffnAF21C7bdJbuNCfIpEEScvx24CghHo3mU4pj44kUr6LZ_oKZAiUTPLDz5RxccaKF7B9-Q
+```
+
+Role: `ADMIN`
+```
+eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJncm91cHMiOlsiUk9MRV9BRE1JTiJdLCJpYXQiOjE2MTQ4NTM0MjMsImV4cCI6NDc3MDUyNzAyMywianRpIjoiY2YwYzRiNmQtOWMzOC00ZjRlLWI5MDgtNjI1NjMzNWMxNjFhIiwiaXNzIjoiaHR0cHM6Ly9zcHJpbmctcGV0Y2xpbmljLmdpdGh1Yi5pby9pc3N1ZXIifQ.F06Vcu1_kr9_54I1vxZjo6Z31ucMnidiWjANuJL34lUMfKWp-8EC9D7Z0lAjWrkN4QTDVTUe_M__lnS2AAx4Zpi1dZU17kgqdB9AZH4cZlUONYRUk_r3Omrhdk-8gFqwPDnDtntJcPha7mHnIdQDNfrypsB2sCkYaaZyclYGDIN_VV_kgNZ4nOJQiNWNPezJKqLV5bQPdbv7JSAPte1N6wF15dfDcKNqEfgg7TqTjZLCz02lBn4_KkzzI9snE4fYDACA_TcaA1LNqwrclErkutW8wXogWR9PKVENNO-3mDtTwRlUeGsLQCFZEofykjhtHuwz6nP7v1nAP4VKt2IZiQ
+```
+
+Roles: `OWNER_ADMIN`, `VET_ADMIN`, `ADMIN`
+```
+eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJncm91cHMiOlsiUk9MRV9BRE1JTiIsIlJPTEVfVkVUX0FETUlOIiwiUk9MRV9PV05FUl9BRE1JTiJdLCJpYXQiOjE2MTQ4NTM0NzgsImV4cCI6NDc3MDUyNzA3OCwianRpIjoiMDA1MWNlZjMtM2U2Zi00ZTcyLWE4MDQtZWM0M2Q4YWE0YWFlIiwiaXNzIjoiaHR0cHM6Ly9zcHJpbmctcGV0Y2xpbmljLmdpdGh1Yi5pby9pc3N1ZXIifQ.yLynWsiXPKkUiclHAVn1GE8nF_ml6SYw41tRGZjC-jYHaeiVEpgtkA71zYN8fXrPgBBpqhHBnwvBo7RF_3kLx6evv5sm4GKCkHNmoC513VqwEM72FkswhdbPfkLWPYQO8H3uO76Ta9Lr9AAQhZbiLYbQnlkfAAnH0pnLuBzdOx7OP0m9QAOwAIhovadnC0UAaPM4p-oyGVkmjQGmruma41xMg5faaSOLo9_ogeIOs4mgj_mYnWqhHOR5LlDDVF-e8T95M4w7iEicUAyxB1rtIio2QcXcwDOwsU076k8-AtXTNfQQts76aXYN2sO-MUs6EeUO-FWj3NAVwJuW98QWjQ
+```
+
+To see more details about the token you can decode on https://jwt.io
+
+
+### Create your own JWT Tokens
+
+If you don't want to use the already generated tokens you generate tokens with either your existing private key or by
+creating a new keypair.
+
+1) Generating Keys with OpenSSL 
+   
+    It is also possible to generate a public and private key pair using the OpenSSL command line tool.
+    
+    openssl commands for generating keys
+    ```shell
+    openssl genrsa -out rsaPrivateKey.pem 2048
+    openssl rsa -pubout -in rsaPrivateKey.pem -out publicKey.pem
+    ```
+
+    An additional step is needed for generating the private key for converting it into the PKCS#8 format.
+    
+    openssl command for converting private key
+    ```shell
+    openssl pkcs8 -topk8 -nocrypt -inform pem -in rsaPrivateKey.pem -outform pem -out privateKey.pem
+    ```
+   
+2) Place the public key `publicKey.pem` to a point that is in the classpath like `META-INF/ressources` and configure the
+   following property in `application.properties`:
+   
+    ```
+    mp.jwt.verify.publickey.location=META-INF/resources/publicKey.pem 
+    ```
+
+3) Generate a JWT Token 
+   
+   You can now generate your own JSON Web Token and sign it with your private key `privateKey.pem`. There are a lot of
+   different options available on how to generate a JSON Web Token.
+   
+    **GeneratorTokenTest**:
+       
+   For this application a test class was written to generate new JSON Web Tokens on demand. You can generate new JSON 
+   Web Tokens by enabling the test class `com.mpbauer.serverless.samples.petclinic.security.GeneratorTokenTest.java`. 
+   The test classes will generate a new token with specific roles and print it to the console output.
+   
+
+For more details check out the Quarkus [Security-JWT-Quickstart](https://quarkus.io/guides/security-jwt) guide.
 
 # GitHub Actions CI/CD configuration
 
@@ -462,12 +547,12 @@ Show details about all Knative Services:
 kubectl get ksvc --all-namespaces
 ```
 
-Show details about `quarkus-petclinic-rest application
+Show details about `quarkus-petclinic-rest application`
 ```
 kubectl get ksvc quarkus-petclinic-rest --namespace <CHOOSE NAMESPACE FROM LIST BELOW>
 ```
 
-Available Namespaces:
+**Available Namespaces:**
 
 - `petclinic-native-knative-dev` - Namespace for Petclinic `development` containers running as a native executable
 - `petclinic-native-knative-prod` - Namespace for Petclinic `production` containers running as a native executable

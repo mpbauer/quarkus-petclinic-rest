@@ -1,6 +1,7 @@
 package com.mpbauer.serverless.samples.petclinic.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mpbauer.serverless.samples.petclinic.AbstractIntegrationTest;
 import com.mpbauer.serverless.samples.petclinic.model.User;
 import com.mpbauer.serverless.samples.petclinic.service.UserService;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -16,24 +17,23 @@ import javax.ws.rs.core.Response;
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
-@QuarkusTestResource(H2DatabaseTestResource.class) // TODO check if necessary for native image build
-class UserRestControllerTests {
+@QuarkusTestResource(H2DatabaseTestResource.class)
+class UserRestControllerTests extends AbstractIntegrationTest {
 
     @InjectMock
     UserService userService;
 
     @Test
-    //@WithMockUser(roles="ADMIN")
     void testCreateUserSuccess() throws Exception {
         User user = new User();
         user.setUsername("username");
         user.setPassword("password");
         user.setEnabled(true);
-        user.addRole( "OWNER_ADMIN" );
+        user.addRole("OWNER_ADMIN");
         ObjectMapper mapper = new ObjectMapper();
         String newVetAsJSON = mapper.writeValueAsString(user);
         given()
-            .auth().none()
+            .auth().oauth2(generateValidAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newVetAsJSON)
@@ -44,7 +44,6 @@ class UserRestControllerTests {
     }
 
     @Test
-    //@WithMockUser(roles="ADMIN")
     void testCreateUserError() throws Exception {
         Mockito.doCallRealMethod().when(userService).saveUser(Mockito.any());
 
@@ -55,7 +54,7 @@ class UserRestControllerTests {
         ObjectMapper mapper = new ObjectMapper();
         String newVetAsJSON = mapper.writeValueAsString(user);
         given()
-            .auth().none()
+            .auth().oauth2(generateValidAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newVetAsJSON)

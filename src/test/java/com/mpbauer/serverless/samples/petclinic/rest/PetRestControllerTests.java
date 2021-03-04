@@ -17,6 +17,7 @@
 package com.mpbauer.serverless.samples.petclinic.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mpbauer.serverless.samples.petclinic.AbstractIntegrationTest;
 import com.mpbauer.serverless.samples.petclinic.model.Owner;
 import com.mpbauer.serverless.samples.petclinic.model.Pet;
 import com.mpbauer.serverless.samples.petclinic.model.PetType;
@@ -48,8 +49,7 @@ import static org.mockito.BDDMockito.given;
 
 @QuarkusTest
 @QuarkusTestResource(H2DatabaseTestResource.class)
-    // TODO check if necessary for native image build
-class PetRestControllerTests {
+class PetRestControllerTests extends AbstractIntegrationTest {
 
     @InjectMock
     ClinicService clinicService;
@@ -94,7 +94,7 @@ class PetRestControllerTests {
     void testGetPetSuccess() throws Exception {
         given(this.clinicService.findPetById(3)).willReturn(pets.get(0));
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .when()
             .accept(ContentType.JSON)
             .get("/api/pets/3")
@@ -110,7 +110,7 @@ class PetRestControllerTests {
     void testGetPetNotFound() throws Exception {
         given(this.clinicService.findPetById(-1)).willReturn(null);
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .when()
             .get("/api/pets/-1")
@@ -123,7 +123,7 @@ class PetRestControllerTests {
     void testGetAllPetsSuccess() throws Exception {
         given(this.clinicService.findAllPets()).willReturn(pets);
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .when()
             .get("/api/pets/")
@@ -142,7 +142,7 @@ class PetRestControllerTests {
         pets.clear();
         given(this.clinicService.findAllPets()).willReturn(pets);
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .when()
             .get("/api/pets/")
@@ -159,7 +159,7 @@ class PetRestControllerTests {
         String newPetAsJSON = mapper.writeValueAsString(newPet);
 
         given()
-            .auth().basic("admin", "admin")
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newPetAsJSON)
@@ -179,14 +179,14 @@ class PetRestControllerTests {
         String newPetAsJSON = mapper.writeValueAsString(newPet);
 
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newPetAsJSON)
             .when()
             .post("/api/pets/")
             .then()
-            .log().ifValidationFails(LogDetail.BODY) // TODO is this a full replacement for .andDo(MockMvcResultHandlers.print())?
+            .log().ifValidationFails(LogDetail.BODY)
             .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
     }
 
@@ -200,7 +200,7 @@ class PetRestControllerTests {
         String newPetAsJSON = mapper.writeValueAsString(newPet);
 
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newPetAsJSON)
@@ -211,7 +211,7 @@ class PetRestControllerTests {
             .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .when()
             .get("/api/pets/3")
             .then()
@@ -230,7 +230,7 @@ class PetRestControllerTests {
         String newPetAsJSON = mapper.writeValueAsString(newPet);
 
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newPetAsJSON)
@@ -248,7 +248,7 @@ class PetRestControllerTests {
         String newPetAsJSON = mapper.writeValueAsString(newPet);
         given(this.clinicService.findPetById(3)).willReturn(pets.get(0));
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newPetAsJSON)
@@ -266,7 +266,7 @@ class PetRestControllerTests {
         String newPetAsJSON = mapper.writeValueAsString(newPet);
         given(this.clinicService.findPetById(-1)).willReturn(null);
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newPetAsJSON)
