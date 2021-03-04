@@ -65,6 +65,7 @@ jobs:
 
       # Get the GKE credentials so we can deploy to the cluster
       - name: 'Get GKE Credentials'
+        if: ${{ false }}
         uses: google-github-actions/get-gke-credentials@v0.2.1
         with:
           cluster_name: ${{ secrets.GKE_CLUSTER }}
@@ -73,12 +74,14 @@ jobs:
 
       # Set up Kustomize
       - name: 'Set up Kustomize'
+        if: ${{ false }}
         run: |-
           curl --location https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.0.1/kustomize_v4.0.1_linux_amd64.tar.gz | tar -xz
           chmod u+x ./kustomize
 
       # Deploy to GKE cluster
       - name: 'Deploy to GKE Cluster'
+        if: ${{ false }}
         run: |
           ./kustomize edit set image gcr.io/PROJECT_ID/IMAGE:TAG=gcr.io/${{ secrets.GCP_PROJECT_ID }}/quarkus-petclinic-rest-jvm:${{ env.SHORT_SHA_12 }}-SNAPSHOT
           ./kustomize edit set namespace petclinic-jvm-knative-dev
@@ -149,6 +152,7 @@ jobs:
 
       # Get the GKE credentials so we can deploy to the cluster
       - name: 'Get GKE Credentials'
+        if: ${{ false }}
         uses: google-github-actions/get-gke-credentials@v0.2.1
         with:
           cluster_name: ${{ secrets.GKE_CLUSTER }}
@@ -157,12 +161,14 @@ jobs:
 
       # Set up Kustomize
       - name: 'Set up Kustomize'
+        if: ${{ false }}
         run: |-
           curl --location https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.0.1/kustomize_v4.0.1_linux_amd64.tar.gz | tar -xz
           chmod u+x ./kustomize
 
       # Deploy to GKE cluster
       - name: 'Deploy to GKE Cluster'
+        if: ${{ false }}
         run: |
           ./kustomize edit set image gcr.io/PROJECT_ID/IMAGE:TAG=gcr.io/${{ secrets.GCP_PROJECT_ID }}/quarkus-petclinic-rest-jvm:${{ env.SHORT_SHA_12 }}-SNAPSHOT
           ./kustomize edit set namespace petclinic-native-knative-dev

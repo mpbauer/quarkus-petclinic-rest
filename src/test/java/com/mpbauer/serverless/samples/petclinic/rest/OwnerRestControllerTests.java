@@ -17,6 +17,7 @@
 package com.mpbauer.serverless.samples.petclinic.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mpbauer.serverless.samples.petclinic.AbstractIntegrationTest;
 import com.mpbauer.serverless.samples.petclinic.model.Owner;
 import com.mpbauer.serverless.samples.petclinic.model.Pet;
 import com.mpbauer.serverless.samples.petclinic.model.PetType;
@@ -46,8 +47,7 @@ import static org.mockito.BDDMockito.given;
  */
 @QuarkusTest
 @QuarkusTestResource(H2DatabaseTestResource.class)
-    // TODO check if necessary for native image build
-class OwnerRestControllerTests {
+class OwnerRestControllerTests extends AbstractIntegrationTest {
 
     @InjectMock
     ClinicService clinicService;
@@ -120,12 +120,11 @@ class OwnerRestControllerTests {
     }
 
     @Test
-        //@WithMockUser(roles="OWNER_ADMIN") // TODO
     void testGetOwnerSuccess() {
         given(this.clinicService.findOwnerById(1)).willReturn(owners.get(0));
 
         given()
-            .auth().none()  // TODO change to JWT Token Authentication
+            .auth().oauth2(generateValidOwnerAdminToken())
             .when()
             .get("/api/owners/1")
             .then()
@@ -140,7 +139,7 @@ class OwnerRestControllerTests {
     void testGetOwnerNotFound() {
         given(this.clinicService.findOwnerById(-1)).willReturn(null);
         given()
-            .auth().none() // TODO change to JWT Token Authentication
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .when()
             .get("/api/owners/-1")
@@ -155,7 +154,7 @@ class OwnerRestControllerTests {
         owners.remove(1);
         given(this.clinicService.findOwnerByLastName("Davis")).willReturn(owners);
         given()
-            .auth().none() // TODO change to JWT Token Authentication
+            .auth().oauth2(generateValidOwnerAdminToken())
             .when()
             .get("/api/owners/*/lastname/Davis")
             .then()
@@ -173,7 +172,7 @@ class OwnerRestControllerTests {
         owners.clear();
         given(this.clinicService.findOwnerByLastName("0")).willReturn(owners);
         given()
-            .auth().none() // TODO
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .when()
             .get("/api/owners/?lastName=0")
@@ -188,7 +187,7 @@ class OwnerRestControllerTests {
         owners.remove(1);
         given(this.clinicService.findAllOwners()).willReturn(owners);
         given()
-            .auth().none() // TODO
+            .auth().oauth2(generateValidOwnerAdminToken())
             .when()
             .get("/api/owners/")
             .then()
@@ -206,7 +205,7 @@ class OwnerRestControllerTests {
         owners.clear();
         given(this.clinicService.findAllOwners()).willReturn(owners);
         given()
-            .auth().none() // TODO
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .when()
             .get("/api/owners/")
@@ -223,7 +222,7 @@ class OwnerRestControllerTests {
         String newOwnerAsJSON = mapper.writeValueAsString(newOwner);
 
         given()
-            .auth().none() // TODO
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newOwnerAsJSON)
@@ -244,7 +243,7 @@ class OwnerRestControllerTests {
         String newOwnerAsJSON = mapper.writeValueAsString(newOwner);
 
         given()
-            .auth().none() // TODO
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newOwnerAsJSON)
@@ -271,7 +270,7 @@ class OwnerRestControllerTests {
         String newOwnerAsJSON = mapper.writeValueAsString(updatedOwner);
 
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newOwnerAsJSON)
@@ -281,7 +280,7 @@ class OwnerRestControllerTests {
             .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .when()
@@ -308,7 +307,7 @@ class OwnerRestControllerTests {
         String newOwnerAsJSON = mapper.writeValueAsString(updatedOwner);
 
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newOwnerAsJSON)
@@ -318,7 +317,7 @@ class OwnerRestControllerTests {
             .statusCode(Response.Status.NO_CONTENT.getStatusCode());
 
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .when()
@@ -346,7 +345,7 @@ class OwnerRestControllerTests {
         String newOwnerAsJSON = mapper.writeValueAsString(updatedOwner);
 
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newOwnerAsJSON)
@@ -366,7 +365,7 @@ class OwnerRestControllerTests {
         String newOwnerAsJSON = mapper.writeValueAsString(newOwner);
 
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newOwnerAsJSON)
@@ -386,7 +385,7 @@ class OwnerRestControllerTests {
         given(this.clinicService.findOwnerById(1)).willReturn(owners.get(0));
 
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newOwnerAsJSON)
@@ -405,7 +404,7 @@ class OwnerRestControllerTests {
         given(this.clinicService.findOwnerById(-1)).willReturn(null);
 
         given()
-            .auth().none()
+            .auth().oauth2(generateValidOwnerAdminToken())
             .accept(ContentType.JSON)
             .contentType(ContentType.JSON)
             .body(newOwnerAsJSON)

@@ -18,8 +18,8 @@ package com.mpbauer.serverless.samples.petclinic.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.mpbauer.serverless.samples.petclinic.rest.JacksonCustomPetDeserializer;
-import com.mpbauer.serverless.samples.petclinic.rest.JacksonCustomPetSerializer;
+import com.mpbauer.serverless.samples.petclinic.model.serializer.JacksonCustomPetDeserializer;
+import com.mpbauer.serverless.samples.petclinic.model.serializer.JacksonCustomPetSerializer;
 
 import javax.persistence.*;
 import java.util.*;
