@@ -615,3 +615,17 @@ In GitHub, you need to set up the following secrets via your repositories settin
 In the end your secrets should look like this:
 
 [![SETUP_GITHUB_GCP_SECRETS_00](docs/screenshots/setup-github-secrets/setup_github_gcp_secrets_00.png)](docs/screenshots/setup-github-secrets/setup_github_gcp_secrets_00.png)
+
+## Google Cloud Run Endpoints - Development
+
+| Application                   | URL
+| ----------------------------- |:-------------:
+| Quarkus Petclinic (JVM)       | https://quarkus-petclinic-rest-jvm-dev-s2xflp6dzq-ey.a.run.app
+| Quarkus Petclinic (Native)    | https://quarkus-petclinic-rest-native-dev-s2xflp6dzq-ey.a.run.app
+
+## Google Cloud Run Endpoints - Production
+
+| Application                   | URL
+| ----------------------------- |:-------------:
+| Quarkus Petclinic (JVM)       | https://quarkus-petclinic-rest-jvm-prod-s2xflp6dzq-ey.a.run.app
+| Quarkus Petclinic (Native)    | https://quarkus-petclinic-rest-native-prod-s2xflp6dzq-ey.a.run.app
