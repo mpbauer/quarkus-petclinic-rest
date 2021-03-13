@@ -303,14 +303,14 @@ creating a new keypair.
 
 For more details check out the Quarkus [Security-JWT-Quickstart](https://quarkus.io/guides/security-jwt) guide.
 
-# GitHub Actions CI/CD configuration
+## GitHub Actions CI/CD configuration
 
 This section explains the necessary setup details to build and deploy the `quarkus-petclinic-rest` application
 to [Google Cloud Platform (GCP)](https://cloud.google.com/)
 and [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine) where we use [Knative](https://knative.dev/)
 for serverless deployments.
 
-## Service Accounts
+### Service Accounts
 
 GitHub Actions is building the container images with [Google Cloud Build](https://cloud.google.com/build) and stores the
 resulting container image in [Google Container Registry](https://cloud.google.com/container-registry). Afterwards the

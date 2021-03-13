@@ -90,7 +90,7 @@ class PetRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-    void testGetPetSuccess() throws Exception {
+    void testGetPetSuccess() {
         given(this.clinicService.findPetById(3)).willReturn(pets.get(0));
         given()
             .auth().oauth2(generateValidOwnerAdminToken())
@@ -105,7 +105,7 @@ class PetRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-    void testGetPetNotFound() throws Exception {
+    void testGetPetNotFound() {
         given(this.clinicService.findPetById(-1)).willReturn(null);
         given()
             .auth().oauth2(generateValidOwnerAdminToken())
@@ -117,7 +117,7 @@ class PetRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-    void testGetAllPetsSuccess() throws Exception {
+    void testGetAllPetsSuccess() {
         given(this.clinicService.findAllPets()).willReturn(pets);
         given()
             .auth().oauth2(generateValidOwnerAdminToken())
@@ -134,7 +134,7 @@ class PetRestControllerTests extends AbstractIntegrationTest {
     }
 
     @Test
-    void testGetAllPetsNotFound() throws Exception {
+    void testGetAllPetsNotFound() {
         pets.clear();
         given(this.clinicService.findAllPets()).willReturn(pets);
         given()
