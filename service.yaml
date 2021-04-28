@@ -7,6 +7,10 @@ spec:
     spec:
       containers:
         - image: gcr.io/PROJECT_ID/IMAGE:TAG
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 512M
           env:
             - name: "DB_HOST"
               valueFrom:
