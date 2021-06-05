@@ -1,0 +1,39 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: quarkus-petclinic-rest
+spec:
+  template:
+    spec:
+      containers:
+        - image: gcr.io/PROJECT_ID/IMAGE:TAG
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 512M
+          env:
+            - name: "DB_HOST"
+              valueFrom:
+                secretKeyRef:
+                  name: quarkus-petclinic-rest-credentials
+                  key: db-host
+            - name: "DB_PORT"
+              valueFrom:
+                secretKeyRef:
+                  name: quarkus-petclinic-rest-credentials
+                  key: db-port
+            - name: "DB_DATABASE"
+              valueFrom:
+                secretKeyRef:
+                  name: quarkus-petclinic-rest-credentials
+                  key: db-database
+            - name: "DB_USERNAME"
+              valueFrom:
+                secretKeyRef:
+                  name: quarkus-petclinic-rest-credentials
+                  key: db-username
+            - name: "DB_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: quarkus-petclinic-rest-credentials
+                  key: db-password
