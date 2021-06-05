@@ -1,6 +1,6 @@
 [![Quarkus](docs/images/quarkus-logo.png)](https://quarkus.io/)
 
-# Quarkus PetClinic Sample Application
+# [Quarkus PetClinic Sample Application](https://github.com/mpbauer/quarkus-petclinic-rest)
 
 This backend version of the Spring Petclinic application only provides a REST API. **There is no UI**.
 The [spring-petclinic-angular project](https://github.com/spring-petclinic/spring-petclinic-angular) is a Angular
@@ -9,6 +9,13 @@ front-end application which consumes the REST API.
 A modified version (specific to this project) of
 the [spring-petclinic-angular project](https://github.com/spring-petclinic/spring-petclinic-angular) can be
 found [HERE](https://github.com/mpbauer/spring-petclinic-angular)
+
+---
+**NOTE**
+
+This project is based upon code from the commit reference `f97f1d44580d9950463043b451902f2e4955dea7` of the repository [spring-petclinic/spring-petclinic-rest](https://github.com/spring-petclinic/spring-petclinic-rest).
+
+---
 
 ## Understanding the Spring Petclinic application with a few diagrams
 
